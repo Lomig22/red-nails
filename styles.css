@@ -845,3 +845,10 @@ mark.todo { background: #FDE3E7; color: var(--red-deep); padding: 1px 4px; font-
 .thanks__help { margin-top: 28px; font-size: .92rem; }
 .thanks__help a { color: var(--red); }
 .thanks__back { margin-top: 22px; }
+
+/* Bouton principal : animation d'entrée PUIS halo lumineux (avant, l'entrée écrasait le halo) */
+.js .btn--glow.enter {
+  animation: enter .8s var(--ease) both, glow 2.6s ease-out infinite;
+  animation-delay: calc(var(--i, 0) * 55ms + 60ms), calc(var(--i, 0) * 55ms + 900ms);
+}
+@media (prefers-reduced-motion: reduce) { .js .btn--glow.enter { animation: none !important; } }

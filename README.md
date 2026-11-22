@@ -36,8 +36,8 @@ Les prix s'écrivent avec un **point** (`24.99`). Après modification, il suffit
 | Prix du kit seul | `const PRIX_UNITAIRE = 24.99;` |
 | Prix des lots 2 et 3 kits | `BUNDLES` → `price` |
 | Prix barré du kit seul | `const PRIX_REFERENCE = null;` (ex. `34.99`) |
-| Frais de livraison 1 kit | `const FRAIS_LIVRAISON = 3.99;` |
-| Livraison offerte dès X kits | `SHIPPING.freeFromKits` |
+| Frais de livraison (actuellement offerts partout) | `const FRAIS_LIVRAISON = 0;` |
+| Livraison offerte dès X kits | `SHIPPING.freeFromKits` (actuellement 1) |
 | Prix d'une pose en institut | `COMPARISON.salonPrice` |
 
 Le **prix par ongle**, le **prix barré des lots** (quantité × prix unitaire) et le **badge -X %**

@@ -537,7 +537,7 @@
    */
   const shadeBundle = () => BUNDLES.find((b) => b.qty === (C.SHADE_CARD_QTY || 1)) || BUNDLES[0];
 
-  /** Libellés des boutons des cartes teintes : "Commander · 24,99 €" + "1 kit · livraison 3,99 €". */
+  /** Libellés des boutons des cartes teintes : "Commander · 24,99 €" + "1 kit · livraison offerte". */
   function updateShadeButtons() {
     const b = shadeBundle();
     $$('[data-color-card]').forEach((card) => {

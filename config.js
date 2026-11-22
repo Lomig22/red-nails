@@ -17,8 +17,8 @@
        {sizes}        nb de tailles (selon la couleur)       → 15
        {perSize}      ongles par taille                      → 2
        {length} / {width}  dimensions des ongles (selon la couleur)
-       {shipping}     frais de livraison 1 kit         → 3,99 €
-       {freeFrom}     nb de kits pour la livraison offerte → 2
+       {shipping}     frais de livraison (0 = offerte)  → 0 €
+       {freeFrom}     nb de kits pour la livraison offerte → 1 (offerte dès 1 kit)
        {cutoff}       heure limite d'expédition        → 14h
        {minDays} / {maxDays}  délais de livraison en jours ouvrés
        {returnDays}   délai de rétractation            → 14
@@ -41,8 +41,9 @@ const PRIX_UNITAIRE = 24.99;
 // (Article L112-1-1 du Code de la consommation.) Laisse null pour ne rien afficher. Ex. : 34.99
 const PRIX_REFERENCE = null;
 
-// Frais de livraison pour 1 kit.
-const FRAIS_LIVRAISON = 3.99;
+// Frais de livraison. Livraison OFFERTE sur toutes les commandes, dès 1 kit.
+// (Pour la rendre payante à nouveau : mets le prix ici et freeFromKits à 2.)
+const FRAIS_LIVRAISON = 0;
 
 // Visuels communs à toutes les teintes (kit de 30 ongles en 15 tailles, mode d'emploi).
 const KIT_CONTENT = { src: 'images/commun/contenu-kit.webp', label: 'Contenu du kit', alt: 'Contenu du kit : 30 ongles en 15 tailles avec leurs dimensions, lime à ongles et pastilles adhésives' };
@@ -100,7 +101,7 @@ window.RN_CONFIG = {
     { qty: 3, price: 52.47, label: '3 kits', highlight: 'Le plus choisi' },
   ],
   // Lot présélectionné à l'arrivée (0 = 1 kit, 1 = 2 kits, 2 = 3 kits).
-  // Le lot de 2 affiche directement un prix barré légal + la livraison offerte.
+  // Le lot de 2 affiche directement un prix barré légal (-20 %).
   DEFAULT_BUNDLE: 1,
   CTA_PRESELECT_BEST: false,
   // Cartes de la section "Trouve ta teinte" : nombre de kits commandés au clic
@@ -110,7 +111,7 @@ window.RN_CONFIG = {
   /* ---------- Livraison ---------- */
   SHIPPING: {
     price: FRAIS_LIVRAISON,
-    freeFromKits: 2,
+    freeFromKits: 1, // livraison offerte dès 1 kit = partout
   },
 
   /* ---------- Promesse de livraison avec date ---------- */
@@ -330,7 +331,7 @@ window.RN_CONFIG = {
   /* ---------- Textes de la page ---------- */
   TEXTS: {
     announce: [
-      'Livraison offerte dès 2 kits',
+      'Livraison offerte',
       'Jusqu’à -30 % sur les lots',
       'Paiement sécurisé',
       'Satisfaite ou remboursée 14 jours',
@@ -370,7 +371,7 @@ window.RN_CONFIG = {
     ],
 
     cta: 'J’en profite · jusqu’à -{maxDiscount} %',
-    ctaNote: 'Livraison offerte dès {freeFrom} kits · Retours {returnDays} jours',
+    ctaNote: 'Livraison offerte · Retours {returnDays} jours',
 
     // Section "Le détail" (remplace l'ancienne comparaison de prix)
     details: {
@@ -480,7 +481,7 @@ window.RN_CONFIG = {
       total: 'Total',
       checkout: 'Passer commande',
       remove: 'Retirer',
-      upsell: 'Ajoute 1 kit : -20 % et livraison offerte',
+      upsell: 'Ajoute 1 kit : -20 % sur ta commande',
       upsellBtn: '+ 1 kit',
       demo: 'Mode démo : le paiement sera branché sur Shopify.',
       added: 'Ajouté au panier',
