@@ -44,6 +44,10 @@ const PRIX_REFERENCE = null;
 // Frais de livraison pour 1 kit.
 const FRAIS_LIVRAISON = 3.99;
 
+// Visuels communs à toutes les teintes (kit de 30 ongles en 15 tailles, mode d'emploi).
+const KIT_CONTENT = { src: 'images/commun/contenu-kit.webp', label: 'Contenu du kit', alt: 'Contenu du kit : 30 ongles en 15 tailles avec leurs dimensions, lime à ongles et pastilles adhésives' };
+const USAGE_GUIDE = { src: 'images/commun/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes : limer, nettoyer, coller l’adhésif, choisir la taille, appuyer, c’est terminé' };
+
 /* --------------------------------------------------------------------------
    2. CONFIGURATION COMPLÈTE
    -------------------------------------------------------------------------- */
@@ -68,7 +72,7 @@ window.RN_CONFIG = {
     titleAccent: 'en gel souple',      // partie en italique du titre
     price: PRIX_UNITAIRE,
     // Caractéristiques par défaut du kit. Une couleur peut avoir un kit
-    // différent : voir "kit: { … }" dans COLORS (ex. Bleu Nuit).
+    // différent : voir "kit: { … }" dans COLORS. Aujourd'hui : 30 ongles pour toutes.
     nailsPerKit: 30,
     sizes: 15,
     perSize: 2,
@@ -133,7 +137,8 @@ window.RN_CONFIG = {
      id          : nom du dossier /images/[id]/ et paramètre d'URL (?couleur=bordeaux)
      hex         : teinte de la pastille (prélevée sur les photos)
      variantId   : ID de la variante Shopify (à remplacer)
-     kit         : (optionnel) caractéristiques si différentes du kit par défaut
+     kit         : (optionnel) caractéristiques si un jour une teinte a un format différent
+                   ex. kit: { nailsPerKit: 24, sizes: 12, perSize: 2, length: '…', width: '…' }
      images      : vraies photos, dans l'ordre de la galerie
      thumbImage  : photo utilisée en vignette (barre collante, panier)
      cardImage   : photo produit seul sur fond neutre (section "Les teintes")
@@ -147,59 +152,77 @@ window.RN_CONFIG = {
         { src: 'images/bordeaux/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
         { src: 'images/bordeaux/set.webp', label: 'Le set', alt: 'Les 30 faux ongles {color} du kit' },
         { src: 'images/bordeaux/finition.webp', label: 'Finition', alt: 'Faux ongles {color} à la finition brillante, rangés par taille' },
-        { src: 'images/bordeaux/contenu-kit.webp', label: 'Contenu du kit', alt: 'Contenu du kit : 15 tailles d’ongles avec leurs dimensions, lime à ongles et pastilles adhésives' },
         { src: 'images/bordeaux/quotidien.webp', label: 'Au quotidien', alt: 'Ongles rouges au quotidien : taper au clavier, jardiner, faire la vaisselle, jouer avec son chien' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 2, detailImage: 0, kitImage: 3,
+      thumbImage: 0, cardImage: 2, detailImage: 0, kitImage: 4,
     },
     {
       id: 'bleu-nuit', name: 'Bleu Nuit', hex: '#1B2A5E', variantId: 'VARIANT_BLEU_NUIT',
       desc: 'Un marine profond, chic et inattendu.',
-      kit: { nailsPerKit: 24, sizes: 12, perSize: 2, length: '1,90 – 2,50 cm', width: '0,70 – 1,40 cm' },
       images: [
         { src: 'images/bleu-nuit/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur une main' },
         { src: 'images/bleu-nuit/main-2.webp', label: 'Brillance', alt: 'Gros plan sur les faux ongles {color} et leur reflet laqué' },
         { src: 'images/bleu-nuit/main-3.webp', label: 'Portés', alt: 'Mains aux faux ongles {color} en forme amande' },
         { src: 'images/bleu-nuit/main-4.webp', label: 'Portés', alt: 'Faux ongles {color} posés sur deux mains' },
         { src: 'images/bleu-nuit/finition.webp', label: 'Finition', alt: 'Faux ongles {color} en gel souple, finition brillante' },
-        { src: 'images/commun/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
-        { src: 'images/commun/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
       ],
       thumbImage: 0, cardImage: 4, detailImage: 1, kitImage: 5,
     },
     {
       id: 'rose-bonbon', name: 'Rose Bonbon', hex: '#D81B60', variantId: 'VARIANT_ROSE_BONBON',
       desc: 'Un rose framboise, joyeux et lumineux.',
-      kit: { nailsPerKit: 24, sizes: 12, perSize: 2, length: '1,90 – 2,50 cm', width: '0,70 – 1,40 cm' },
       images: [
         { src: 'images/rose-bonbon/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
         { src: 'images/rose-bonbon/finition.webp', label: 'Finition', alt: 'Faux ongles {color} à la finition brillante, rangés par taille' },
-        { src: 'images/rose-bonbon/set.webp', label: 'Le set', alt: 'Les 24 faux ongles {color} du kit' },
-        { src: 'images/commun/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
-        { src: 'images/commun/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes' },
+        { src: 'images/rose-bonbon/set.webp', label: 'Le set', alt: 'Les faux ongles {color} du kit' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
       ],
       thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
     },
     {
       id: 'nude-rose', name: 'Nude Rosé', hex: '#EAC7C3', variantId: 'VARIANT_NUDE_ROSE',
       desc: 'L’effet ongles parfaits, rosé et laiteux.',
-      // Même présentation que le Bleu et le Rose : format 24 ongles / 12 tailles (à confirmer).
-      kit: { nailsPerKit: 24, sizes: 12, perSize: 2, length: '1,90 – 2,50 cm', width: '0,70 – 1,40 cm' },
       images: [
         { src: 'images/nude-rose/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
         { src: 'images/nude-rose/macro.webp', label: 'Gros plan', alt: 'Gros plan sur la brillance laquée des faux ongles {color}' },
         { src: 'images/nude-rose/main-2.webp', label: 'Portés', alt: 'Deux mains aux faux ongles {color} en forme amande' },
-        { src: 'images/nude-rose/set.webp', label: 'Le set', alt: 'Les 24 faux ongles {color} du kit' },
-        { src: 'images/commun/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
-        { src: 'images/commun/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes' },
+        { src: 'images/nude-rose/set.webp', label: 'Le set', alt: 'Les faux ongles {color} du kit' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
       ],
       thumbImage: 0, cardImage: 3, detailImage: 1, kitImage: 4,
     },
-    // Couleurs en attente de leurs photos (visuels provisoires).
-    // "hidden: true" pour les masquer du site sans les supprimer.
+    {
+      id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE',
+      desc: 'Un noir miroir, intense et graphique.',
+      images: [
+        { src: 'images/noir-laque/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur une main' },
+        { src: 'images/noir-laque/set.webp', label: 'Le set', alt: 'Les 30 faux ongles {color} du kit' },
+        { src: 'images/noir-laque/finition.webp', label: 'Finition', alt: 'Faux ongles {color} à la finition miroir, rangés par taille' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
+      ],
+      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
+    },
+    {
+      id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC',
+      desc: 'La French intemporelle, bout blanc net.',
+      images: [
+        { src: 'images/french-blanc/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande, base rosée et bout blanc' },
+        { src: 'images/french-blanc/main-2.webp', label: 'Portés', alt: 'Mains aux faux ongles {color} en forme amande' },
+        { src: 'images/french-blanc/main-3.webp', label: 'Portés', alt: 'Faux ongles {color} posés sur deux mains' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
+      ],
+      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
+    },
+    // En attente de photos : visuels provisoires. "hidden: true" pour la masquer.
     { id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE', desc: 'Le rouge signature, brillant comme un vernis laqué.' },
-    { id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE', desc: 'Un noir miroir, intense et graphique.' },
-    { id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC', desc: 'La French intemporelle, bout blanc net.' },
   ],
   DEFAULT_COLOR: 'bordeaux',
 
@@ -232,6 +255,23 @@ window.RN_CONFIG = {
     verified: 'Achat vérifié',
     countLabel: '{count} avis',
     previewNotice: 'Aperçu de mise en page : exemples fictifs, jamais affichés sur le site en ligne.',
+  },
+
+  /* ---------- Pixel Meta & consentement (CNIL) ----------
+     Le pixel n'est chargé QU'APRÈS l'accord de la visiteuse ("Accepter"),
+     comme l'exige la CNIL pour les traceurs publicitaires. Les événements
+     PageView, ViewContent, AddToCart et InitiateCheckout sont alors envoyés.
+     Sur Shopify : utilise plutôt l'app "Facebook & Instagram" (pixel + API
+     de conversion + événement Purchase) et la bannière cookies de Shopify.   */
+  META_PIXEL_ID: '2750897045307789',
+  CONSENT: {
+    enabled: true,
+    text: 'Nous utilisons des cookies pour mesurer l’efficacité de nos publicités (Meta). Tu peux accepter ou refuser : ça ne change rien à ta commande.',
+    accept: 'Accepter',
+    refuse: 'Refuser',
+    more: 'En savoir plus',
+    moreHref: 'confidentialite.html',
+    manage: 'Gérer les cookies',
   },
 
   /* ---------- Pop-up promo ---------- */

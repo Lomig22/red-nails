@@ -131,10 +131,18 @@ de la galerie (même chemin que la 1re photo de la couleur) : c'est ce qui rend 
   le bouton envoie directement le panier (`/cart/VARIANT:QTE,…`). Il faut alors des vrais `variantId`.
 - `DEMO_MODE: false` retire la mention « mode démo » du tiroir panier.
 
-### Pixels publicitaires
+### Pixel Meta & cookies
 
-Si le pixel Meta (`fbq`) ou TikTok (`ttq`) est installé dans le `<head>`, la page envoie
-automatiquement `ViewContent`, `AddToCart` et `InitiateCheckout` (fonction `track()` dans `app.js`).
+- ID du pixel : `META_PIXEL_ID` dans `config.js` (actuellement `2750897045307789`).
+- Le pixel ne se charge **qu'après « Accepter »** dans la bannière cookies (obligation CNIL).
+  « Refuser » est aussi visible qu'« Accepter », et le choix se modifie via « Gérer les cookies »
+  en bas de page.
+- Événements envoyés : `PageView`, `ViewContent`, `AddToCart`, `InitiateCheckout`
+  (les événements faits avant la réponse sont envoyés juste après « Accepter »).
+- **Purchase** (indispensable pour l'objectif « Ventes ») se déclenche sur la page de paiement
+  Shopify : installe l'app **Facebook & Instagram** de Shopify avec ce même pixel (elle ajoute aussi
+  l'API de conversion), et active la bannière cookies Shopify. Sur Shopify, tu peux alors passer
+  `CONSENT.enabled` à `false` et laisser l'app gérer le pixel pour éviter les doublons.
 
 ---
 

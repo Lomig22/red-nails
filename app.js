@@ -43,13 +43,65 @@
     set(k, v) { try { window.sessionStorage.setItem(k, v); } catch (e) { /* ignoré */ } },
   };
 
-  /** Événements pour les pixels Meta / TikTok s'ils sont installés. */
-  function track(event, data) {
+  /* ---------- Pixel Meta + consentement (CNIL) ---------- */
+  const META_STANDARD = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead'];
+  const CONSENT_KEY = 'rn_consent';
+  const pixelQueue = []; // événements en attente de la réponse de la visiteuse
+  const consentStore = {
+    get() { try { return window.localStorage.getItem(CONSENT_KEY); } catch (e) { return null; } },
+    set(v) { try { window.localStorage.setItem(CONSENT_KEY, v); } catch (e) { /* ignoré */ } },
+  };
+  let pixelLoaded = false;
+
+  /** Charge le pixel Meta (code officiel), seulement après consentement. */
+  function loadMetaPixel() {
+    if (pixelLoaded || !C.META_PIXEL_ID) return;
+    pixelLoaded = true;
+    /* eslint-disable */
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+      n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t, s);
+    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    /* eslint-enable */
+    window.fbq('init', C.META_PIXEL_ID);
+    window.fbq('track', 'PageView');
+    while (pixelQueue.length) sendToPixels(...pixelQueue.shift());
+  }
+
+  function sendToPixels(event, data) {
     try {
-      if (typeof window.fbq === 'function') window.fbq('track', event, data);
+      if (typeof window.fbq === 'function') window.fbq(META_STANDARD.includes(event) ? 'track' : 'trackCustom', event, data);
       if (window.ttq && typeof window.ttq.track === 'function') window.ttq.track(event, data);
     } catch (e) { /* un pixel ne doit jamais casser la page */ }
+  }
+
+  /** Événements publicitaires : envoyés tout de suite, mis en attente, ou ignorés si refus. */
+  function track(event, data) {
+    const consent = C.CONSENT && C.CONSENT.enabled ? consentStore.get() : 'granted';
+    if (consent === 'granted' && pixelLoaded) sendToPixels(event, data);
+    else if (consent !== 'denied') pixelQueue.push([event, data]);
     document.dispatchEvent(new CustomEvent('rn:' + event, { detail: data }));
+  }
+
+  function initConsent() {
+    const banner = $('[data-consent]');
+    if (!C.META_PIXEL_ID) return;
+    if (!C.CONSENT || !C.CONSENT.enabled) { loadMetaPixel(); return; }
+    $('[data-consent-more]').href = C.CONSENT.moreHref;
+    const answer = (choice) => {
+      consentStore.set(choice);
+      banner.hidden = true;
+      if (choice === 'granted') { loadMetaPixel(); if (typeof window.fbq === 'function') window.fbq('consent', 'grant'); }
+      else { pixelQueue.length = 0; if (typeof window.fbq === 'function') window.fbq('consent', 'revoke'); }
+    };
+    $$('[data-consent-choice]').forEach((b) => b.addEventListener('click', () => answer(b.dataset.consentChoice)));
+    $('[data-consent-open]').addEventListener('click', () => { banner.hidden = false; });
+    const saved = consentStore.get();
+    if (saved === 'granted') loadMetaPixel();
+    else if (saved !== 'denied') banner.hidden = false;
   }
 
   const P = C.PRODUCT;
@@ -933,6 +985,7 @@
     initPopup();
     initReviews();
     initReveal();
+    initConsent();
     $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', goToOffers));
     track('ViewContent', { content_ids: [state.color.variantId], content_name: t(P.title), content_type: 'product', value: UNIT, currency: C.CURRENCY });
   }
