@@ -138,6 +138,28 @@ automatiquement `ViewContent`, `AddToCart` et `InitiateCheckout` (fonction `trac
 
 ---
 
+### Avis clientes
+
+La note sous le titre et la section « Elles les portent » s'affichent **automatiquement dès qu'il y a de
+vrais avis** dans `REVIEWS.items` (format dans `config.js`), ou en collant le widget Judge.me / Loox dans
+`#reviews-widget`. Tant que la liste est vide, rien ne s'affiche.
+Pour voir la mise en page sans rien publier : ajoute `?apercu-avis=1` à l'adresse (exemples fictifs,
+signalés comme tels). ⚠️ N'ajoute jamais d'avis inventés ou copiés d'un autre vendeur (art. L121-4 du
+Code de la consommation).
+
+### Livraison selon la ville
+
+Le bloc livraison affiche « Livraison à Marseille » grâce à la ville devinée depuis l'adresse IP
+(service gratuit GeoJS, sans demande d'autorisation). Désactivable avec `DELIVERY.geolocate: false`.
+À mentionner dans la politique de confidentialité.
+
+### Design
+
+- Polices : **Bodoni Moda** (titres, prix) et **Jost** (texte), chargées depuis Google Fonts.
+- Couleurs : variables en haut de `styles.css` (`--red`, `--ink`, `--bg`…).
+- Les boutons d'achat « s'illuminent » (halo + reflet) : classe `btn--glow`, coupée si la visiteuse
+  a activé la réduction des animations.
+
 ## ⚠️ À valider avant la mise en ligne
 
 - **Promesses produit** (pose 10 min, réutilisable, tenue jusqu'à 2 semaines) : avec le fournisseur.

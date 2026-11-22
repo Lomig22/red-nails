@@ -2,14 +2,14 @@
    RED NAILS — app.js
    JavaScript vanilla, sans dépendance. Tout le contenu vient de config.js
    (window.RN_CONFIG). Sommaire :
-     1. Utilitaires & calculs de prix     7. Promesse de livraison (dates)
-     2. État                              8. Panier (addToCart + tiroir démo)
-     3. Textes & rendus statiques         9. Barre d'achat collante
-     4. Galerie (swipe, miniatures, zoom) 10. Pop-up promo
-     5. Couleurs                          11. Comparaison animée, apparitions
-     6. Lots & prix                       12. Démarrage
-   Portage Shopify : chaque bloc correspond à une partie de la section Liquid
-   (voir README.md).
+      1. Utilitaires & prix             8. Livraison (date + ville)
+      2. État & images                  9. Panier (addToCart + tiroir démo)
+      3. Textes & rendus               10. Barre d'achat collante
+      4. Galerie (swipe, flèches, zoom) 11. Pop-up promo
+      5. Teintes                       12. Avis clientes
+      6. Lots & prix                   13. Apparitions au défilement
+      7. (réservé)                     14. Démarrage
+   Portage Shopify : voir README.md.
    ========================================================================== */
 (function () {
   'use strict';
@@ -18,7 +18,7 @@
   if (!C) { console.error('[RED NAILS] config.js introuvable.'); return; }
 
   /* ======================================================================
-     1. UTILITAIRES & CALCULS DE PRIX
+     1. UTILITAIRES & PRIX
      ====================================================================== */
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -29,12 +29,13 @@
 
   const moneyFmt = new Intl.NumberFormat(C.LOCALE, { style: 'currency', currency: C.CURRENCY });
   const moneyIntFmt = new Intl.NumberFormat(C.LOCALE, { style: 'currency', currency: C.CURRENCY, maximumFractionDigits: 0 });
-  /** Formate un prix : 24.99 → "24,99 €" ; 40 → "40 €" */
+  /** 24.99 → "24,99 €" ; 40 → "40 €" */
   const money = (n) => (Number.isInteger(n) ? moneyIntFmt : moneyFmt).format(n);
   const moneyFull = (n) => moneyFmt.format(n);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+  const isDesktop = window.matchMedia('(min-width: 1000px)');
 
   /** sessionStorage protégé (navigation privée, cookies bloqués…) */
   const session = {
@@ -42,7 +43,7 @@
     set(k, v) { try { window.sessionStorage.setItem(k, v); } catch (e) { /* ignoré */ } },
   };
 
-  /** Envoie un événement aux pixels Meta / TikTok s'ils sont installés. */
+  /** Événements pour les pixels Meta / TikTok s'ils sont installés. */
   function track(event, data) {
     try {
       if (typeof window.fbq === 'function') window.fbq('track', event, data);
@@ -53,18 +54,20 @@
 
   const P = C.PRODUCT;
   const UNIT = P.price;
+  const params = new URLSearchParams(window.location.search);
+
   /** Couleur sélectionnée (state est défini plus bas, appelé seulement après). */
   function activeColor() { return state.color; }
-  /**
-   * Caractéristiques du kit d'une couleur : PRODUCT par défaut, surchargé par
-   * color.kit dans config.js (ex. Bleu Nuit = 24 ongles, 12 tailles).
-   */
-  const specOf = (color) => Object.assign({ nailsPerKit: P.nailsPerKit, sizes: P.sizes, perSize: P.perSize }, color && color.kit);
+  /** Caractéristiques du kit d'une couleur : PRODUCT, surchargé par color.kit. */
+  const specOf = (color) => Object.assign(
+    { nailsPerKit: P.nailsPerKit, sizes: P.sizes, perSize: P.perSize, length: P.length, width: P.width },
+    color && color.kit
+  );
   const nailsFor = (kits, color = activeColor()) => kits * specOf(color).nailsPerKit;
   /** Prix par ongle arrondi au centime : 24,99 / 30 = 0,83 € */
   const perNail = (price, kits, color = activeColor()) => round2(price / nailsFor(kits, color));
 
-  /** Lots enrichis : prix barré = quantité × prix unitaire pratiqué. */
+  /** Lots : prix barré = quantité × prix unitaire réellement pratiqué. */
   const BUNDLES = C.BUNDLES.map((b) => {
     const regular = round2(UNIT * b.qty);
     let compareAt = null;
@@ -73,15 +76,11 @@
     if (b.qty === 1 && C.PRIX_REFERENCE && C.PRIX_REFERENCE > b.price) compareAt = C.PRIX_REFERENCE;
     // Arrondi à l'inférieur : la réduction affichée n'est jamais surévaluée.
     const discount = compareAt ? Math.floor((1 - b.price / compareAt) * 100 + 1e-6) : 0;
-    return Object.assign({}, b, {
-      compareAt,
-      discount,
-      freeShipping: b.qty >= C.SHIPPING.freeFromKits,
-    });
+    return Object.assign({}, b, { compareAt, discount, freeShipping: b.qty >= C.SHIPPING.freeFromKits });
   });
   const BEST_BUNDLE = BUNDLES.reduce((best, b, i) => (b.price / b.qty < BUNDLES[best].price / BUNDLES[best].qty ? i : best), 0);
 
-  /** Prix d'un nombre de kits quelconque : on applique les lots les plus gros d'abord. */
+  /** Prix d'un nombre de kits quelconque : les plus gros lots d'abord. */
   function priceForKits(kits) {
     const sorted = BUNDLES.slice().sort((a, b) => b.qty - a.qty);
     let left = kits, total = 0;
@@ -91,27 +90,26 @@
 
   const D = C.DELIVERY;
   const pad = (n) => String(n).padStart(2, '0');
+  const COLORS = C.COLORS.filter((c) => !c.hidden);
 
-  /** Variables disponibles dans tous les textes de config.js : {perNail}, {cutoff}… */
+  /** Variables communes à tous les textes : {cutoff}, {maxDiscount}… */
   const VARS = {
     price: money(UNIT),
-    // meilleur prix à l'ongle, toutes couleurs confondues ("dès 0,58 € l'ongle")
-    minPerNail: money(Math.min(...C.COLORS.map((c) => perNail(BUNDLES[BEST_BUNDLE].price, BUNDLES[BEST_BUNDLE].qty, c)))),
-    salonPrice: money(C.COMPARISON.salonPrice),
-    posePrice: money(round2(UNIT / P.posesPerKit)),
+    minPerNail: money(Math.min(...COLORS.map((c) => perNail(BUNDLES[BEST_BUNDLE].price, BUNDLES[BEST_BUNDLE].qty, c)))),
+    maxDiscount: Math.max(0, ...BUNDLES.map((b) => b.discount)),
     shipping: money(C.SHIPPING.price),
     freeFrom: C.SHIPPING.freeFromKits,
     cutoff: D.cutoffMinute ? `${D.cutoffHour}h${pad(D.cutoffMinute)}` : `${D.cutoffHour}h`,
     minDays: D.minDays,
     maxDays: D.maxDays,
     returnDays: C.RETURN_DAYS,
-    colorCount: C.COLORS.length,
+    colorCount: COLORS.length,
     year: new Date().getFullYear(),
   };
-  /** Variables qui dépendent de la couleur : {nails}, {sizes}, {perSize}, {perNail} */
+  /** Variables qui dépendent de la teinte choisie. */
   function colorVars(color = activeColor()) {
     const k = specOf(color);
-    return { nails: k.nailsPerKit, sizes: k.sizes, perSize: k.perSize, perNail: money(perNail(UNIT, 1, color)) };
+    return { nails: k.nailsPerKit, sizes: k.sizes, perSize: k.perSize, length: k.length, width: k.width, perNail: money(perNail(UNIT, 1, color)), color: color.name };
   }
   /** Remplace les {variables} d'un texte. */
   const t = (str, extra) => String(str == null ? '' : str).replace(/\{(\w+)\}/g, (m, k) => {
@@ -120,10 +118,8 @@
   });
 
   /* ======================================================================
-     2. ÉTAT
+     2. ÉTAT & IMAGES
      ====================================================================== */
-  const COLORS = C.COLORS;
-  const params = new URLSearchParams(window.location.search);
   const urlColor = COLORS.find((c) => c.id === params.get('couleur'));
   const urlBundle = BUNDLES.findIndex((b) => String(b.qty) === params.get('lot'));
 
@@ -132,60 +128,54 @@
     bundle: urlBundle >= 0 ? urlBundle : clamp(C.DEFAULT_BUNDLE || 0, 0, BUNDLES.length - 1),
     bundleTouched: urlBundle >= 0,
     slide: 0,
+    city: null,
     cart: [], // { variantId, colorId, kits }
   };
   const currentBundle = () => BUNDLES[state.bundle];
+  const hasPhotos = (color) => Array.isArray(color.images) && color.images.length > 0;
 
-  /**
-   * Galerie d'une couleur : liste de { src, alt, label }.
-   * - si la couleur a ses propres photos (color.images dans config.js), on les utilise ;
-   * - sinon visuels par défaut /images/[id]/[file].[IMAGE_EXT] (GALLERY_VIEWS).
-   */
+  /** Galerie d'une couleur : [{ src, alt, label }] (photos réelles ou visuels par défaut). */
   function galleryOf(color) {
-    if (Array.isArray(color.images) && color.images.length) {
+    if (hasPhotos(color)) {
       return color.images.map((img, i) => {
         const v = C.GALLERY_VIEWS[i] || C.GALLERY_VIEWS[0];
         if (typeof img === 'string') return { src: img, alt: t(v.alt, { color: color.name }), label: v.label };
         return { src: img.src, alt: t(img.alt || v.alt, { color: color.name }), label: img.label || v.label };
       });
     }
-    return C.GALLERY_VIEWS.map((v) => ({
-      src: `images/${color.id}/${v.file}.${C.IMAGE_EXT}`,
-      alt: t(v.alt, { color: color.name }),
-      label: v.label,
-    }));
+    return C.GALLERY_VIEWS.map((v) => ({ src: `images/${color.id}/${v.file}.${C.IMAGE_EXT}`, alt: t(v.alt, { color: color.name }), label: v.label }));
   }
   const imageAt = (color, i) => { const g = galleryOf(color); return g[clamp(i, 0, g.length - 1)]; };
-  const imageSrc = (color, i) => imageAt(color, i).src;
-  const imageAlt = (color, i) => imageAt(color, i).alt;
-  /** Vignette (cartes couleur, barre collante, panier) et visuel de la section "kit". */
-  const thumbIndex = (color) => (color.thumbImage != null ? color.thumbImage : 2);
-  const kitIndex = (color) => (color.kitImage != null ? color.kitImage : 4);
+  const pick = (color, key, fallback) => imageAt(color, color[key] != null ? color[key] : fallback);
 
-  /** Petites icônes SVG (inline, pas de requête). */
+  /** Icônes au trait fin (inline, pas de requête). */
   const ICONS = {
-    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-    repeat: '<path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/>',
-    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
-    lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
-    return: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
-    truck: '<path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    repeat: '<path d="M17 3l3 3-3 3"/><path d="M4 11V9.5A3.5 3.5 0 0 1 7.5 6H20"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v1.5a3.5 3.5 0 0 1-3.5 3.5H4"/>',
+    drop: '<path d="M12 3.5c3 3.6 5.5 6.6 5.5 9.7a5.5 5.5 0 0 1-11 0c0-3.1 2.5-6.1 5.5-9.7Z"/>',
+    lock: '<rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3"/>',
+    return: '<path d="M9 14 4.5 9.5 9 5"/><path d="M4.5 9.5H15a4.5 4.5 0 0 1 0 9h-3"/>',
+    truck: '<path d="M3 6.5h11v9.5H3z"/><path d="M14 9.5h3.8l3.2 3.3v3.2h-7"/><circle cx="7" cy="17.8" r="1.8"/><circle cx="17" cy="17.8" r="1.8"/>',
     check: '<path d="M5 12.5 10 17l9-10"/>',
-    cart: '<path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/>',
-    box: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
-    home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
-    scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.1 8.1 20 20M8.1 15.9 20 4"/>',
+    cart: '<path d="M5.5 8h13l-1 12.5h-11L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
+    box: '<path d="M3.5 8 12 3.5 20.5 8v8L12 20.5 3.5 16z"/><path d="M3.5 8 12 12.5 20.5 8M12 12.5v8"/>',
+    home: '<path d="M3.5 11 12 4l8.5 7"/><path d="M5.5 9.5V20h13V9.5"/>',
+    pin: '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/>',
+    star: '<path d="m12 3.2 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z" fill="currentColor" stroke="none"/>',
+    starEmpty: '<path d="m12 3.2 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/>',
+    sparkle: '<path d="M12 3v5M12 16v5M3 12h5M16 12h5M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M6.3 17.7l2.5-2.5M15.2 8.8l2.5-2.5"/>',
   };
-  const icon = (name, size = 18, stroke = 2) =>
+  const icon = (name, size = 18, stroke = 1.4) =>
     `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+  const starsHtml = (rating, size = 14) => `<span class="stars" aria-hidden="true">${[1, 2, 3, 4, 5].map((n) => icon(n <= Math.round(rating) ? 'star' : 'starEmpty', size, 1.2)).join('')}</span>`;
+  const num2 = (n) => String(n).padStart(2, '0');
 
   const live = (msg) => { const el = $('[data-live]'); if (el) { el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 50); } };
 
   /* ======================================================================
-     3. TEXTES & RENDUS STATIQUES
+     3. TEXTES & RENDUS
      ====================================================================== */
   function renderTexts() {
-    // data-t="TEXTS.compare.title" → texte tiré de config.js
     $$('[data-t]').forEach((el) => {
       const val = getPath(C, el.getAttribute('data-t'));
       if (typeof val === 'string') el.textContent = t(val);
@@ -194,35 +184,59 @@
 
   function renderAnnouncement() {
     const items = C.TEXTS.announce.map((txt) => `<span class="announce__item">${esc(t(txt))}</span>`).join('');
-    // Contenu doublé pour un défilement continu sans saut.
     $('[data-render="announce"]').innerHTML = items + `<span class="announce__clone" data-clone>${items}</span>`;
     $('[data-render="announce-sr"]').textContent = C.TEXTS.announce.map((x) => t(x)).join(' · ');
   }
 
-  /**
-   * Textes qui changent avec la couleur (nb d'ongles, tailles, prix par ongle) :
-   * titre, ligne "institut", étapes, contenu du kit, FAQ.
-   */
+  function renderStatic() {
+    $('[data-render="promises"]').innerHTML = P.promises.map((p) => `<li>${icon(p.icon, 15)}<span>${esc(t(p.text))}</span></li>`).join('');
+    $('[data-render="reassurance"]').innerHTML = C.TEXTS.reassurance
+      .map((r) => `<li>${icon(r.icon, 22, 1.3)}<strong>${esc(t(r.title))}</strong><span>${esc(t(r.text))}</span></li>`).join('');
+    $('[data-render="footer-links"]').innerHTML = C.TEXTS.footer.links.map((l) => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join('');
+    $('[data-footer-copy]').textContent = t(C.TEXTS.footer.copyright);
+    $('[data-done]').innerHTML = icon('sparkle', 20) + `<span>${esc(t(C.TEXTS.steps.done))}</span>`;
+
+    // CTA répétés
+    $$('[data-render="cta"]').forEach((band) => {
+      const inverse = band.classList.contains('cta-band--inverse');
+      band.innerHTML = `
+        <button class="btn ${inverse ? 'btn--white' : 'btn--primary'} btn--glow" type="button" data-cta-offers>${esc(t(C.TEXTS.cta))}</button>
+        <p class="cta-band__note">${esc(t(C.TEXTS.ctaNote))}</p>`;
+    });
+    renderColorTexts();
+  }
+
+  /** Textes qui changent avec la teinte (nb d'ongles, tailles, dimensions). */
   function renderColorTexts() {
     renderTexts();
-    const pn = esc(colorVars().perNail);
-    const salon = $('[data-salon-line]');
-    salon.innerHTML = icon('scissors', 18) + '<span>' +
-      esc(t(C.TEXTS.product.salonLine)).replace(pn, `<strong>${pn}</strong>`) + '</span>';
-    $('.compare__line').innerHTML = esc(t(C.TEXTS.compare.line)).replace(pn, `<strong>${pn}</strong>`);
+    $('[data-title]').textContent = t(P.title);
+    $('[data-title-accent]').textContent = t(P.titleAccent);
 
-    // on garde ouvertes les questions de la FAQ déjà ouvertes
-    const open = $$('[data-render="faq"] details').map((d) => d.open);
-    $('[data-render="steps"]').innerHTML = C.TEXTS.steps.items.map((s, i) => `
-      <li class="step">
-        <span class="step__num" aria-hidden="true">${i + 1}</span>
-        <h3 class="step__title"><span class="sr-only">Étape ${i + 1} : </span>${esc(t(s.title))}</h3>
-        <p class="step__text">${esc(t(s.text))}</p>
+    $('[data-render="details"]').innerHTML = C.TEXTS.details.items.map((d, i) => `
+      <li>
+        <span class="details__num">N°${num2(i + 1)}</span>
+        <h3 class="details__title">${esc(t(d.title))}</h3>
+        <p class="details__text">${esc(t(d.text))}</p>
       </li>`).join('');
 
-    $('[data-render="kit"]').innerHTML = C.TEXTS.kit.items
-      .map((item) => `<li>${icon('check', 26, 3)}<span>${esc(t(item))}</span></li>`).join('');
+    $('[data-render="steps"]').innerHTML = C.TEXTS.steps.items.map((s, i) => `
+      <li class="step">
+        <span class="step__num" aria-hidden="true">${num2(i + 1)}</span>
+        <span class="step__time">${esc(t(s.time))}</span>
+        <h3 class="step__title"><span class="sr-only">Étape ${i + 1} : </span>${esc(t(s.title))}</h3>
+        <p class="step__text">${esc(t(s.text))}</p>
+        ${s.tip ? `<p class="step__tip"><b>Astuce</b>${esc(t(s.tip))}</p>` : ''}
+      </li>`).join('');
 
+    $('[data-render="kit"]').innerHTML = C.TEXTS.kit.items.map((k) => `
+      <li>
+        <span class="kit__qty">${esc(/^\d$/.test(t(k.qty)) ? num2(t(k.qty)) : t(k.qty))}</span>
+        <h3 class="kit__name">${esc(t(k.title))}</h3>
+        <p class="kit__text">${esc(t(k.text))}</p>
+      </li>`).join('');
+    $('[data-render="specs"]').innerHTML = C.TEXTS.kit.specs.map((s) => `<div><dt>${esc(t(s.label))}</dt><dd>${esc(t(s.value))}</dd></div>`).join('');
+
+    const open = $$('[data-render="faq"] details').map((d) => d.open);
     $('[data-render="faq"]').innerHTML = C.TEXTS.faq.items.map((f) => `
       <details>
         <summary>${esc(t(f.q))}</summary>
@@ -231,37 +245,8 @@
     $$('[data-render="faq"] details').forEach((d, i) => { if (open[i]) d.open = true; });
   }
 
-  function renderStatic() {
-    $('[data-render="promises"]').innerHTML = P.promises
-      .map((p) => `<li>${icon(p.icon, 16)}<span>${esc(t(p.text))}</span></li>`).join('');
-
-    $('[data-render="reassurance"]').innerHTML = C.TEXTS.reassurance
-      .map((r) => `<li>${icon(r.icon, 24, 1.8)}<strong>${esc(t(r.title))}</strong><span>${esc(t(r.text))}</span></li>`).join('');
-
-    renderColorTexts();
-
-    $('[data-render="footer-links"]').innerHTML = C.TEXTS.footer.links
-      .map((l) => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join('');
-    $('[data-footer-copy]').textContent = t(C.TEXTS.footer.copyright);
-
-    // CTA répétés : "J'en profite – dès 0,58 € l'ongle"
-    $$('[data-render="cta"]').forEach((band) => {
-      const inverse = band.classList.contains('cta-band--inverse');
-      band.innerHTML = `
-        <button class="btn ${inverse ? 'btn--white' : 'btn--primary'}" type="button" data-cta-offers>${esc(t(C.TEXTS.cta))}</button>
-        <p class="cta-band__note">${esc(t(C.TEXTS.ctaNote))}</p>`;
-    });
-
-    if (C.REVIEWS && C.REVIEWS.visible) $('#avis').hidden = false;
-
-    // Indication de zoom adaptée à l'appareil
-    const hint = () => { $('[data-gallery-hint-text]').textContent = canHover.matches ? C.TEXTS.product.galleryHintHover : C.TEXTS.product.galleryHintTouch; };
-    hint();
-    canHover.addEventListener && canHover.addEventListener('change', hint);
-  }
-
   /* ======================================================================
-     4. GALERIE — miniatures, swipe (scroll-snap natif), zoom x2,5
+     4. GALERIE — swipe natif (comme Instagram), flèches, points, miniatures, zoom
      ====================================================================== */
   const gallery = {
     vp: null,
@@ -273,18 +258,17 @@
       const track = $('[data-render="slides"]');
       const slide = (i) => `
         <div class="gallery__slide" role="group" aria-roledescription="diapositive" aria-label="${i + 1} sur ${views.length}">
-          <img src="${esc(imageSrc(state.color, i))}" alt="${esc(imageAlt(state.color, i))}" width="800" height="800"
+          <img src="${esc(views[i].src)}" alt="${esc(views[i].alt)}" width="800" height="800"
                ${i === 0 ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" draggable="false">
         </div>`;
-      // Si la 1re image écrite en dur dans index.html est la bonne, on la garde
-      // (pas de re-téléchargement ni de nouveau "LCP") et on ajoute les suivantes.
+      // On garde la 1re image écrite en dur dans index.html si c'est la bonne (LCP).
       const first = track.querySelector('.gallery__slide img');
-      if (first && first.getAttribute('src') === views[0].src) {
+      if (first && first.getAttribute('src') === views[0].src && track.children.length === 1) {
         const s = first.parentElement;
         s.setAttribute('role', 'group');
         s.setAttribute('aria-roledescription', 'diapositive');
         s.setAttribute('aria-label', `1 sur ${views.length}`);
-        first.alt = imageAlt(state.color, 0);
+        first.alt = views[0].alt;
         first.draggable = false;
         track.insertAdjacentHTML('beforeend', views.slice(1).map((v, k) => slide(k + 1)).join(''));
       } else {
@@ -293,16 +277,16 @@
       this.count = views.length;
       $('[data-render="thumbs"]').innerHTML = views.map((v, i) => `
         <button class="thumb" type="button" data-thumb="${i}" aria-label="Voir la photo : ${esc(v.label)}" aria-current="${i === 0}">
-          <img src="${esc(v.src)}" alt="" width="76" height="76" loading="lazy" decoding="async">
+          <img src="${esc(v.src)}" alt="" width="74" height="74" loading="lazy" decoding="async">
         </button>`).join('');
+      $('[data-render="dots"]').innerHTML = views.map((v, i) => `<i${i === 0 ? ' class="is-active"' : ''}></i>`).join('');
+      const single = views.length < 2;
+      $$('[data-gallery-prev], [data-gallery-next], [data-render="dots"]').forEach((el) => { el.hidden = single; });
     },
 
-    /** Change les images pour une nouvelle couleur (même vue conservée). */
-    swap(color) {
+    swap() {
       const track = $('[data-render="slides"]');
       const apply = () => {
-        // Chaque couleur peut avoir sa propre galerie (nombre et ordre des photos) :
-        // on reconstruit les diapositives et on revient à la 1re photo.
         this.unzoom();
         track.textContent = '';
         this.render();
@@ -312,7 +296,7 @@
       };
       if (reducedMotion.matches) return apply();
       track.classList.add('is-swapping');
-      setTimeout(apply, 160);
+      setTimeout(apply, 180);
     },
 
     goTo(i, smooth = true) {
@@ -325,10 +309,10 @@
 
     setActive(i) {
       state.slide = i;
-      if (this.vp) this.vp.parentElement.classList.toggle('is-first', i === 0);
+      this.vp.parentElement.classList.toggle('is-first', i === 0);
       $$('.thumb').forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
+      $$('[data-render="dots"] i').forEach((d, k) => d.classList.toggle('is-active', k === i));
       $('[data-gallery-count]').textContent = `${i + 1} / ${this.count}`;
-      // La miniature active reste visible dans la rangée (sans faire défiler la page)
       const row = $('[data-render="thumbs"]');
       const th = $$('.thumb')[i];
       if (row && th && row.scrollWidth > row.clientWidth) {
@@ -337,14 +321,10 @@
     },
 
     currentImg() { return $$('.gallery__slide img', this.vp)[state.slide]; },
-
-    /** Le point zoomé suit le curseur / le doigt (transform-origin dynamique). */
     setOrigin(clientX, clientY) {
       const img = this.currentImg(); if (!img) return;
       const r = this.vp.getBoundingClientRect();
-      const x = clamp(((clientX - r.left) / r.width) * 100, 0, 100);
-      const y = clamp(((clientY - r.top) / r.height) * 100, 0, 100);
-      img.style.transformOrigin = `${x}% ${y}%`;
+      img.style.transformOrigin = `${clamp(((clientX - r.left) / r.width) * 100, 0, 100)}% ${clamp(((clientY - r.top) / r.height) * 100, 0, 100)}%`;
     },
     zoom(clientX, clientY) {
       const img = this.currentImg(); if (!img) return;
@@ -363,11 +343,10 @@
     },
 
     init() {
-      this.render();
       const vp = (this.vp = $('#gallery-viewport'));
-      this.setActive(0); // compteur "1 / N" juste dès l'arrivée
+      this.render();
+      this.setActive(0);
 
-      // Synchronise la miniature active avec le swipe
       let ticking = false;
       vp.addEventListener('scroll', () => {
         if (ticking) return;
@@ -379,16 +358,12 @@
         });
       }, { passive: true });
 
+      $('[data-gallery-prev]').addEventListener('click', () => this.goTo(state.slide - 1));
+      $('[data-gallery-next]').addEventListener('click', () => this.goTo(state.slide + 1));
       $('[data-render="thumbs"]').addEventListener('click', (e) => {
         const b = e.target.closest('[data-thumb]');
         if (b) this.goTo(Number(b.dataset.thumb));
       });
-      // Survol d'une miniature sur desktop = aperçu immédiat
-      $('[data-render="thumbs"]').addEventListener('mouseover', (e) => {
-        const b = e.target.closest('[data-thumb]');
-        if (b && canHover.matches && Number(b.dataset.thumb) !== state.slide) this.goTo(Number(b.dataset.thumb), false);
-      });
-
       vp.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowRight') { e.preventDefault(); this.goTo(state.slide + 1); }
         if (e.key === 'ArrowLeft') { e.preventDefault(); this.goTo(state.slide - 1); }
@@ -402,7 +377,6 @@
         if (!this.zoomed) this.zoom(e.clientX, e.clientY); else this.setOrigin(e.clientX, e.clientY);
       });
       vp.addEventListener('mouseleave', () => { if (canHover.matches) this.unzoom(); });
-
       // Mobile : un tap active / désactive le zoom ; on glisse le doigt pour explorer
       vp.addEventListener('click', (e) => {
         if (canHover.matches) return;
@@ -414,17 +388,14 @@
         this.setOrigin(e.touches[0].clientX, e.touches[0].clientY);
       }, { passive: false });
 
-      // Recalage après rotation / redimensionnement
       window.addEventListener('resize', () => { vp.scrollLeft = state.slide * vp.clientWidth; });
     },
   };
 
   /* ======================================================================
-     5. COULEURS
+     5. TEINTES
      ====================================================================== */
-  function swatchStyle(c) {
-    return `--c:${c.hex};` + (c.tip ? `--tip:${c.tip};` : '');
-  }
+  const swatchStyle = (c) => `--c:${c.hex};` + (c.tip ? `--tip:${c.tip};` : '');
 
   function renderColors() {
     $('[data-render="swatches"]').innerHTML = COLORS.map((c) => `
@@ -433,31 +404,33 @@
         <span style="${swatchStyle(c)}" ${c.tip ? 'data-tip' : ''}><span class="sr-only">${esc(c.name)}</span></span>
       </label>`).join('');
 
-    $('[data-render="color-cards"]').innerHTML = COLORS.map((c) => `
+    // Cartes : le produit seul sur fond neutre (ou un aplat de la teinte en attendant les photos)
+    $('[data-render="color-cards"]').innerHTML = COLORS.map((c) => {
+      const media = hasPhotos(c)
+        ? `<img src="${esc(pick(c, 'cardImage', 0).src)}" alt="" width="400" height="400" loading="lazy" decoding="async">`
+        : `<span class="shade__flat"><i style="${swatchStyle(c)}" ${c.tip ? 'data-tip' : ''}></i></span><span class="shade__soon">${esc(C.TEXTS.colors.soon)}</span>`;
+      return `
       <li>
-        <button class="color-card" type="button" data-color-card="${esc(c.id)}" aria-pressed="${c === state.color}">
-          <span class="color-card__media"><img src="${esc(imageSrc(c, thumbIndex(c)))}" alt="" width="400" height="400" loading="lazy" decoding="async"></span>
-          <span class="color-card__body">
-            <span class="color-card__name"><i style="${swatchStyle(c)}"></i>${esc(c.name)}</span>
-            <span class="color-card__desc">${esc(c.desc || '')}</span>
-            <span class="color-card__pill" data-pill>${esc(c === state.color ? C.TEXTS.colors.selected : C.TEXTS.colors.choose)}</span>
+        <button class="shade" type="button" data-color-card="${esc(c.id)}" aria-pressed="${c === state.color}">
+          <span class="shade__media">${media}</span>
+          <span class="shade__body">
+            <span class="shade__name"><i style="${swatchStyle(c)}"></i>${esc(c.name)}</span>
+            <span class="shade__desc">${esc(c.desc || '')}</span>
+            <span class="shade__pill" data-pill>${esc(c === state.color ? C.TEXTS.colors.selected : C.TEXTS.colors.choose)}</span>
           </span>
         </button>
-      </li>`).join('');
+      </li>`;
+    }).join('');
 
-    $('[data-render="swatches"]').addEventListener('change', (e) => {
-      if (e.target.name === 'color') setColor(e.target.value);
-    });
+    $('[data-render="swatches"]').addEventListener('change', (e) => { if (e.target.name === 'color') setColor(e.target.value); });
     $('[data-render="color-cards"]').addEventListener('click', (e) => {
       const card = e.target.closest('[data-color-card]');
       if (!card) return;
       setColor(card.dataset.colorCard);
-      // remonte vers la fiche produit
       $('#produit').scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
     });
   }
 
-  /** Sélectionne une couleur partout dans la page. */
   function setColor(id, opts = {}) {
     const color = COLORS.find((c) => c.id === id);
     if (!color) return;
@@ -471,33 +444,31 @@
       card.setAttribute('aria-pressed', String(on));
       $('[data-pill]', card).textContent = on ? C.TEXTS.colors.selected : C.TEXTS.colors.choose;
     });
-    $$('[data-color-dot]').forEach((dot) => { dot.style.setProperty('--c', color.hex); });
-    $('[data-add-label]').textContent = t(C.TEXTS.product.addToCart, { color: color.name });
-    $('[data-sticky-thumb]').src = imageSrc(color, thumbIndex(color));
+    const thumb = pick(color, 'thumbImage', 0);
+    $('[data-sticky-thumb]').src = thumb.src;
     $('[data-sticky-thumb]').alt = color.name;
-    const kitImg = $('[data-kit-img]');
-    kitImg.src = imageSrc(color, kitIndex(color));
-    kitImg.alt = imageAlt(color, kitIndex(color));
+    const kit = pick(color, 'kitImage', 4);
+    $('[data-kit-img]').src = kit.src;
+    $('[data-kit-img]').alt = kit.alt;
+    const det = pick(color, 'detailImage', 0);
+    $('[data-detail-img]').src = det.src;
+    $('[data-detail-img]').alt = det.alt;
 
     if (changed) {
-      // nb d'ongles / tailles / prix par ongle propres à la couleur
       renderColorTexts();
       renderBundles();
-      updatePrice(false);
-      if (compareDone) $('[data-counter]').textContent = moneyFull(perNail(UNIT, 1));
     }
+    updatePrice(false);
 
     if (changed && !opts.silent) {
-      gallery.swap(color);
-      live(`Couleur sélectionnée : ${color.name}`);
-      // URL partageable (utile pour les pubs) : ?couleur=bordeaux
+      gallery.swap();
+      live(`Teinte sélectionnée : ${color.name}`);
       try {
         const u = new URL(window.location.href);
         u.searchParams.set('couleur', id);
         window.history.replaceState(null, '', u);
-      } catch (e) { /* file:// ou navigateur ancien */ }
+      } catch (e) { /* file:// */ }
     }
-    updateSticky();
   }
 
   /* ======================================================================
@@ -510,9 +481,9 @@
         <input type="radio" name="bundle" value="${i}" ${i === state.bundle ? 'checked' : ''}>
         <span class="bundle__radio" aria-hidden="true"></span>
         <span class="bundle__main">
-          <span class="bundle__title">${esc(b.label)} ${b.discount ? `<span class="badge">-${b.discount} %</span>` : ''}</span>
-          <span class="bundle__sub">${esc(t(tx.nailsCount, { count: nailsFor(b.qty) }))} · <strong>${esc(t(tx.perNailShort, { value: money(perNail(b.price, b.qty)) }))}</strong></span>
-          ${b.freeShipping ? `<span class="bundle__ship">${icon('truck', 15)}${esc(tx.freeShipping)}</span>` : ''}
+          <span class="bundle__title">${esc(b.label)}${b.discount ? ` <span class="bundle__off">-${b.discount} %</span>` : ''}</span>
+          <span class="bundle__sub">${esc(t(tx.nailsCount, { count: nailsFor(b.qty) }))} · <strong>${money(perNail(b.price, b.qty))}/ongle</strong></span>
+          ${b.freeShipping ? `<span class="bundle__ship">${icon('truck', 14)}${esc(tx.freeShipping)}</span>` : ''}
         </span>
         <span class="bundle__price">
           ${b.compareAt ? `<s><span class="sr-only">au lieu de </span>${money(b.compareAt)}</s>` : ''}
@@ -535,53 +506,49 @@
     state.bundle = i;
     $$('input[name="bundle"]').forEach((input) => {
       input.checked = Number(input.value) === i;
-      // classe de secours pour les navigateurs sans :has() (iOS < 15.4)
-      input.closest('.bundle').classList.toggle('is-checked', input.checked);
+      input.closest('.bundle').classList.toggle('is-checked', input.checked); // secours sans :has()
     });
     updatePrice(true);
   }
 
   function updatePrice(animate) {
     const b = currentBundle();
-    $('[data-price-now]').textContent = money(b.price);
+    const tx = C.TEXTS.product;
+    const now = $('[data-price-now]');
+    now.textContent = money(b.price);
     const was = $('[data-price-was]');
     const badge = $('[data-price-badge]');
+    was.hidden = badge.hidden = !b.compareAt;
     if (b.compareAt) {
-      was.hidden = false;
       was.innerHTML = `<span class="sr-only">au lieu de </span>${money(b.compareAt)}`;
-      badge.hidden = false;
       badge.textContent = `-${b.discount} %`;
-    } else {
-      was.hidden = true;
-      badge.hidden = true;
     }
-    const pn = $('[data-per-nail]');
-    pn.textContent = money(perNail(b.price, b.qty));
-    if (animate && !reducedMotion.matches) { pn.classList.remove('is-pop'); void pn.offsetWidth; pn.classList.add('is-pop'); }
+    const pn = esc(t(tx.perNail, { value: money(perNail(b.price, b.qty)) }));
+    $('[data-price-meta]').innerHTML = b.compareAt
+      ? `<strong>${esc(t(tx.save, { amount: moneyFull(round2(b.compareAt - b.price)) }))}</strong> · ${pn}`
+      : pn;
+    if (animate && !reducedMotion.matches) { now.classList.remove('is-added'); void now.offsetWidth; now.classList.add('is-added'); }
 
+    $('[data-cta-price]').textContent = money(b.price);
     const ship = $('[data-ship-line]');
     ship.classList.toggle('is-free', b.freeShipping);
-    ship.innerHTML = icon(b.freeShipping ? 'check' : 'truck', 18) +
-      `<span>${esc(t(b.freeShipping ? C.TEXTS.product.shippingFree : C.TEXTS.product.shippingPaid))}</span>`;
+    ship.innerHTML = icon(b.freeShipping ? 'check' : 'truck', 16) + `<span>${esc(t(b.freeShipping ? tx.shippingFree : tx.shippingPaid))}</span>`;
     updateSticky();
   }
 
-  /** CTA répétés : remonte au sélecteur de lots (et présélectionne le meilleur prix/ongle). */
+  /** CTA répétés : remonte au sélecteur de lots. */
   function goToOffers() {
     if (C.CTA_PRESELECT_BEST && !state.bundleTouched) setBundle(BEST_BUNDLE);
-    const target = $('#offres');
-    target.scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
+    $('#offres').scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
     const list = $('[data-render="bundles"]');
     list.classList.remove('is-flash'); void list.offsetWidth; list.classList.add('is-flash');
-    // focus sur le lot sélectionné pour le clavier / lecteurs d'écran
     const checked = $('input[name="bundle"]:checked');
     if (checked) setTimeout(() => checked.focus({ preventScroll: true }), reducedMotion.matches ? 0 : 450);
   }
 
   /* ======================================================================
-     7. PROMESSE DE LIVRAISON AVEC DATE
+     8. LIVRAISON — date calculée + ville de la visiteuse
      ====================================================================== */
-  /** Heure actuelle "murale" à Paris, quel que soit le fuseau du visiteur. */
   function nowInZone() {
     const now = new Date();
     try {
@@ -599,7 +566,6 @@
   function nextOpenDay(d, days) { let x = addDays(startOfDay(d), 1); while (!isOpenDay(x, days)) x = addDays(x, 1); return x; }
   function addOpenDays(d, n, days) { let x = startOfDay(d); let left = n; while (left > 0) { x = addDays(x, 1); if (isOpenDay(x, days)) left--; } return x; }
 
-  /** Calcule expédition et fenêtre de livraison. Exposé pour les tests. */
   function computeDelivery(now) {
     const cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate(), D.cutoffHour, D.cutoffMinute || 0);
     const shipsToday = isOpenDay(now, D.shipDays) && now < cutoff;
@@ -616,7 +582,6 @@
   const dateFmt = new Intl.DateTimeFormat(C.LOCALE, { weekday: 'short', day: 'numeric', month: 'short' });
   const weekdayFmt = new Intl.DateTimeFormat(C.LOCALE, { weekday: 'long' });
   const shortFmt = new Intl.DateTimeFormat(C.LOCALE, { day: 'numeric', month: 'short' });
-
   function formatLeft(ms) {
     const totalMin = Math.max(1, Math.ceil(ms / 60000));
     const h = Math.floor(totalMin / 60), m = totalMin % 60;
@@ -628,16 +593,19 @@
     const d = computeDelivery(now);
     const tx = C.TEXTS.delivery;
     const tomorrow = startOfDay(addDays(now, 1));
-    const shipLabel = d.shipsToday ? tx.today
-      : (d.shipDate.getTime() === tomorrow.getTime() ? tx.tomorrow : weekdayFmt.format(d.shipDate));
+    const shipLabel = d.shipsToday ? tx.today : (d.shipDate.getTime() === tomorrow.getTime() ? tx.tomorrow : weekdayFmt.format(d.shipDate));
+
+    const title = $('[data-delivery-title]');
+    title.innerHTML = icon('pin', 18) + (state.city
+      ? esc(tx.title).replace('{city}', `<em>${esc(state.city)}</em>`)
+      : esc(tx.titleNoCity));
 
     const head = d.shipsToday
       ? esc(tx.countdown).replace('{time}', `<strong class="eta__time">${formatLeft(d.msLeft)}</strong>`).replace('{shipLabel}', `<strong>${esc(shipLabel)}</strong>`)
       : esc(tx.noCountdown).replace('{shipLabel}', `<strong>${esc(shipLabel)}</strong>`);
-    const range = esc(tx.range)
-      .replace('{from}', `<strong>${esc(dateFmt.format(d.from))}</strong>`)
-      .replace('{to}', `<strong>${esc(dateFmt.format(d.to))}</strong>`);
-    $('[data-eta-text]').innerHTML = `${head} · ${range}`;
+    const range = esc(tx.range).replace('{from}', `<strong>${esc(dateFmt.format(d.from))}</strong>`).replace('{to}', `<strong>${esc(dateFmt.format(d.to))}</strong>`);
+    const dot = (html) => (/\.(<\/strong>)?$/.test(html) ? html : html + '.');
+    $('[data-eta-text]').innerHTML = `${dot(head)} ${dot(range)}`;
 
     const steps = [
       { icon: 'cart', date: tx.today, cls: 'is-done' },
@@ -646,51 +614,63 @@
     ];
     $('[data-eta-steps]').innerHTML = steps.map((s, i) => `
       <li class="eta__step ${s.cls}">
-        <span class="eta__icon">${icon(s.icon, 16)}</span>
+        <span class="eta__icon">${icon(s.icon, 14)}</span>
         <span class="eta__label">${esc(tx.steps[i])}</span>
         <span class="eta__date">${esc(s.date)}</span>
       </li>`).join('');
   }
 
+  /** Ville de la visiteuse à partir de son IP (sans demande d'autorisation). */
+  async function locateCity() {
+    if (!D.geolocate || !D.geoUrl || !window.fetch) return null;
+    const cached = session.get('rn_city');
+    if (cached !== null) return cached || null;
+    try {
+      const ctrl = 'AbortController' in window ? new AbortController() : null;
+      const timer = setTimeout(() => ctrl && ctrl.abort(), 3000);
+      const res = await fetch(D.geoUrl, { signal: ctrl ? ctrl.signal : undefined, credentials: 'omit' });
+      clearTimeout(timer);
+      const data = await res.json();
+      const city = data && data.country_code === 'FR' && typeof data.city === 'string' ? data.city.trim() : '';
+      session.set('rn_city', city);
+      return city || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   function initDelivery() {
     renderDelivery();
-    // Mise à jour à chaque changement de minute
     const msToNextMinute = 60000 - (Date.now() % 60000) + 50;
     setTimeout(() => { renderDelivery(); setInterval(renderDelivery, 60000); }, msToNextMinute);
+    locateCity().then((city) => { if (city) { state.city = city; renderDelivery(); } });
   }
 
   /* ======================================================================
-     8. PANIER — addToCart(variantId, qty) + tiroir de démonstration
+     9. PANIER — addToCart(variantId, qty) + tiroir de démonstration
      ====================================================================== */
   const cartEl = () => $('#cart');
   const totalKits = () => state.cart.reduce((s, l) => s + l.kits, 0);
 
   /**
    * Ajoute au panier. Point d'entrée unique, appelé par tous les boutons.
-   * @param {string} variantId  ID de variante (Shopify) de la couleur
-   * @param {number} qty        nombre de kits (1, 2, 3…)
-   * Portage Shopify : remplacer le contenu par un fetch('/cart/add.js', …)
-   * (exemple complet dans README.md).
+   * Portage Shopify : remplacer le contenu par fetch('/cart/add.js', …) (README).
    */
   function addToCart(variantId, qty) {
     qty = Math.max(1, parseInt(qty, 10) || 1);
-    const color = COLORS.find((c) => c.variantId === variantId) || state.color;
+    const color = C.COLORS.find((c) => c.variantId === variantId) || state.color;
     const line = state.cart.find((l) => l.variantId === variantId);
     if (line) line.kits += qty; else state.cart.push({ variantId, colorId: color.id, kits: qty });
 
     track('AddToCart', { content_ids: [variantId], content_name: `${t(P.title, colorVars(color))} – ${color.name}`, content_type: 'product', quantity: qty, value: priceForKits(qty), currency: C.CURRENCY });
     renderCart();
-    bumpCount();
+    const btn = $('[data-open-cart]');
+    btn.classList.remove('is-bump'); void btn.offsetWidth; btn.classList.add('is-bump');
     live(`${C.TEXTS.cart.added} : ${qty} kit(s) ${color.name}`);
     openDialog(cartEl());
     return Promise.resolve(state.cart);
   }
-  window.addToCart = addToCart; // accessible globalement (et pour Shopify)
-
-  function bumpCount() {
-    const btn = $('[data-open-cart]');
-    btn.classList.remove('is-bump'); void btn.offsetWidth; btn.classList.add('is-bump');
-  }
+  window.addToCart = addToCart;
 
   function checkoutUrl() {
     if (C.CART_PERMALINK_BASE && state.cart.length) {
@@ -708,23 +688,22 @@
     const body = $('[data-cart-body]');
     const foot = $('[data-cart-foot]');
     if (!state.cart.length) {
-      body.innerHTML = `<div class="cart-empty">${icon('cart', 40, 1.5)}<p>${esc(tx.empty)}</p>
+      body.innerHTML = `<div class="cart-empty">${icon('cart', 36, 1.1)}<p>${esc(tx.empty)}</p>
         <button class="btn btn--primary" type="button" data-cart-shop>${esc(tx.emptyCta)}</button></div>`;
       foot.innerHTML = '';
       return;
     }
-
     const subtotal = round2(state.cart.reduce((s, l) => s + priceForKits(l.kits), 0));
     const free = kits >= C.SHIPPING.freeFromKits;
     const shipping = free ? 0 : C.SHIPPING.price;
 
     body.innerHTML = state.cart.map((l, idx) => {
-      const c = COLORS.find((x) => x.id === l.colorId);
+      const c = C.COLORS.find((x) => x.id === l.colorId);
       const price = priceForKits(l.kits);
       const regular = round2(UNIT * l.kits);
       return `
         <div class="line">
-          <img src="${esc(imageSrc(c, thumbIndex(c)))}" alt="" width="72" height="72">
+          <img src="${esc(pick(c, 'thumbImage', 0).src)}" alt="" width="76" height="76">
           <div>
             <p class="line__title">${esc(t(P.title, colorVars(c)))} – ${esc(c.name)}</p>
             <p class="line__meta">${esc(t(tx.kitsLabel, { count: l.kits, nails: nailsFor(l.kits, c) }))}</p>
@@ -747,7 +726,7 @@
       <div class="sum-row"><span>${esc(tx.subtotal)}</span><span>${moneyFull(subtotal)}</span></div>
       <div class="sum-row"><span>${esc(tx.shipping)}</span><span class="${free ? 'is-free' : ''}">${free ? esc(tx.free) : moneyFull(shipping)}</span></div>
       <div class="sum-row sum-row--total"><span>${esc(tx.total)}</span><span>${moneyFull(round2(subtotal + shipping))}</span></div>
-      <a class="btn btn--primary btn--block" href="${esc(checkoutUrl())}" data-checkout>${esc(tx.checkout)}</a>
+      <a class="btn btn--primary btn--block btn--glow" href="${esc(checkoutUrl())}" data-checkout>${esc(tx.checkout)}</a>
       ${C.DEMO_MODE ? `<p class="demo-note">${esc(tx.demo)}</p>` : ''}`;
   }
 
@@ -779,7 +758,7 @@
     });
   }
 
-  /* ---------- Fenêtres modales (<dialog>) communes ---------- */
+  /* Fenêtres modales (<dialog>) */
   function openDialog(dlg) {
     if (!dlg || dlg.open) return;
     if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
@@ -795,43 +774,38 @@
   }
   function initDialogs() {
     $$('dialog').forEach((dlg) => {
-      // Échap : fermeture animée
       dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeDialog(dlg); });
-      // Clic à l'extérieur (sur le fond) ou sur un bouton [data-close]
-      dlg.addEventListener('click', (e) => {
-        if (e.target === dlg || e.target.closest('[data-close]')) closeDialog(dlg);
-      });
+      dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('[data-close]')) closeDialog(dlg); });
     });
   }
 
   /* ======================================================================
-     9. BARRE D'ACHAT COLLANTE (mobile)
+     10. BARRE D'ACHAT COLLANTE (mobile) — visible dès l'arrivée,
+         masquée seulement quand le bouton principal est à l'écran.
      ====================================================================== */
   function updateSticky() {
     const b = currentBundle();
-    const name = $('[data-sticky-name]');
-    if (!name) return;
-    name.textContent = `${state.color.name} · ${b.label}`;
-    $('[data-sticky-price]').innerHTML = `${money(b.price)} <small>${esc(t(C.TEXTS.product.perNailShort, { value: money(perNail(b.price, b.qty)) }))}</small>`;
+    $('[data-sticky-name]').textContent = `${state.color.name} · ${b.label}`;
+    $('[data-sticky-price]').innerHTML = `${money(b.price)}${b.compareAt ? `<s><span class="sr-only">au lieu de </span>${money(b.compareAt)}</s>` : ''}`;
   }
 
   function initSticky() {
     const bar = $('[data-sticky]');
-    const mainCta = $('#main-cta');
     if (!('IntersectionObserver' in window)) return;
-    const io = new IntersectionObserver(([entry]) => {
-      // visible dès que le bouton principal est passé au-dessus de l'écran
-      const show = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+    let ctaVisible = false;
+    const apply = () => {
+      const show = !ctaVisible && !isDesktop.matches;
       bar.classList.toggle('is-visible', show);
       bar.setAttribute('aria-hidden', String(!show));
       bar.inert = !show;
       document.body.classList.toggle('has-sticky', show);
-    });
-    io.observe(mainCta);
+    };
+    new IntersectionObserver(([entry]) => { ctaVisible = entry.isIntersecting; apply(); }).observe($('#main-cta'));
+    isDesktop.addEventListener && isDesktop.addEventListener('change', apply);
   }
 
   /* ======================================================================
-     10. POP-UP PROMO — 12 s ou intention de sortie, 1 fois par session
+     11. POP-UP PROMO — 12 s ou intention de sortie, 1 fois par session
      ====================================================================== */
   function initPopup() {
     const cfg = C.POPUP;
@@ -839,14 +813,9 @@
     const KEY = 'rn_popup_seen';
     let shown = false;
 
-    // Bouton "Copier le code"
     $('[data-copy-code]').addEventListener('click', async (e) => {
-      const btn = e.currentTarget;
-      const label = $('span', btn);
-      try {
-        await navigator.clipboard.writeText(cfg.code);
-      } catch (err) {
-        // repli : sélection manuelle
+      const label = $('span', e.currentTarget);
+      try { await navigator.clipboard.writeText(cfg.code); } catch (err) {
         const ta = document.createElement('textarea');
         ta.value = cfg.code; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
         dlg.appendChild(ta); ta.select();
@@ -857,17 +826,14 @@
       live(cfg.copiedLabel);
       setTimeout(() => { label.textContent = cfg.copyLabel; }, 2500);
     });
-
     $('[data-popup-cta]').addEventListener('click', () => closeDialog(dlg).then(goToOffers));
 
     if (!cfg.enabled || session.get(KEY)) return;
-
     let timer;
     const onMouseOut = (e) => { if (!e.relatedTarget && e.clientY <= 0) show(); };
     function cleanup() { clearTimeout(timer); document.removeEventListener('mouseout', onMouseOut); }
     function show() {
       if (shown) return;
-      // ne jamais recouvrir le panier : on réessaie plus tard
       if ($('dialog[open]')) { clearTimeout(timer); timer = setTimeout(show, 5000); return; }
       shown = true;
       cleanup();
@@ -880,41 +846,62 @@
   }
 
   /* ======================================================================
-     11. COMPARAISON ANIMÉE & APPARITIONS AU DÉFILEMENT
+     12. AVIS CLIENTES — uniquement de vrais avis (config ou module externe).
+         ?apercu-avis=1 affiche des exemples FICTIFS, signalés comme tels,
+         pour valider la mise en page (jamais affichés sans ce paramètre).
      ====================================================================== */
-  let compareDone = false;
-  function initCompare() {
-    const counter = $('[data-counter]');
-    const from = C.COMPARISON.salonPrice;
-    const pose = round2(UNIT / P.posesPerKit);
-    $('[data-bar-val="salon"]').textContent = money(from) + '+';
-    $('[data-bar-val="ours"]').textContent = money(pose);
-    const setBars = () => {
-      $('[data-bar="salon"]').style.setProperty('--w', '100%');
-      $('[data-bar="ours"]').style.setProperty('--w', `${Math.max(4, (pose / from) * 100)}%`);
-    };
+  const PREVIEW_REVIEWS = [
+    { name: 'Prénom N.', city: 'Ville', rating: 5, color: 'bordeaux', title: 'Titre de l’avis', text: 'Le texte d’un avis vérifié s’affichera ici, tel que la cliente l’a écrit.' },
+    { name: 'Prénom N.', city: 'Ville', rating: 5, color: 'nude-rose', title: 'Titre de l’avis', text: 'Exemple de texte plus long pour vérifier la mise en page : deux ou trois phrases, une impression sur la pose, la tenue ou la teinte choisie.' },
+    { name: 'Prénom N.', city: 'Ville', rating: 4, color: 'bleu-nuit', title: 'Titre de l’avis', text: 'Exemple de texte court.' },
+  ];
 
-    if (reducedMotion.matches || !('IntersectionObserver' in window)) {
-      compareDone = true; counter.textContent = moneyFull(perNail(UNIT, 1)); setBars(); return;
-    }
-    counter.textContent = moneyFull(from);
-    const io = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      io.disconnect();
-      setBars();
-      const start = performance.now(), dur = 1800;
-      const ease = (x) => 1 - Math.pow(1 - x, 4);
-      const step = (now) => {
-        const p = Math.min(1, (now - start) / dur);
-        const to = perNail(UNIT, 1);
-        counter.textContent = moneyFull(round2(from + (to - from) * ease(p)));
-        if (p < 1) requestAnimationFrame(step); else compareDone = true;
-      };
-      requestAnimationFrame(step);
-    }, { threshold: 0.45 });
-    io.observe($('.compare'));
+  function initReviews() {
+    const real = (C.REVIEWS && Array.isArray(C.REVIEWS.items)) ? C.REVIEWS.items.filter((r) => r && r.rating) : [];
+    const preview = !real.length && params.has('apercu-avis');
+    const items = real.length ? real : (preview ? PREVIEW_REVIEWS : []);
+    if (!items.length) return;
+
+    const avg = items.reduce((s, r) => s + Number(r.rating), 0) / items.length;
+    const avgTxt = avg.toLocaleString(C.LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    const countTxt = t(C.REVIEWS.countLabel, { count: items.length });
+
+    // Sous le titre produit
+    const rating = $('[data-rating]');
+    rating.hidden = false;
+    rating.innerHTML = `${starsHtml(avg)}<span class="rating__avg">${avgTxt}</span><span class="rating__count">(${esc(countTxt)})</span>`;
+    rating.setAttribute('aria-label', `Note moyenne ${avgTxt} sur 5, ${countTxt}. Voir les avis`);
+
+    const section = $('#avis');
+    section.hidden = false;
+    if (preview) { const n = $('[data-reviews-notice]'); n.hidden = false; n.textContent = C.REVIEWS.previewNotice; }
+
+    const dist = [5, 4, 3, 2, 1].map((star) => ({ star, n: items.filter((r) => Math.round(r.rating) === star).length }));
+    $('[data-reviews-summary]').innerHTML = `
+      <span class="reviews__avg">${avgTxt}</span>
+      ${starsHtml(avg, 16)}
+      <span class="reviews__total">${esc(countTxt)}</span>
+      <div class="reviews__bars">${dist.map((d) => `<div class="reviews__bar"><b>${d.star}★</b><span style="--w:${(d.n / items.length) * 100}%"></span><em>${d.n}</em></div>`).join('')}</div>`;
+
+    const dfmt = new Intl.DateTimeFormat(C.LOCALE, { day: 'numeric', month: 'long', year: 'numeric' });
+    $('[data-reviews-list]').innerHTML = items.map((r) => {
+      const c = C.COLORS.find((x) => x.id === r.color);
+      const date = r.date ? dfmt.format(new Date(r.date)) : '';
+      return `
+        <li class="review">
+          ${r.photo ? `<div class="review__photo"><img src="${esc(r.photo)}" alt="Photo de ${esc(r.name)}" loading="lazy" decoding="async"></div>` : ''}
+          <span aria-label="${r.rating} sur 5">${starsHtml(r.rating)}</span>
+          ${r.title ? `<h3 class="review__title">${esc(r.title)}</h3>` : ''}
+          <p class="review__text">${esc(r.text)}</p>
+          <p class="review__meta"><b>${esc(r.name)}</b>${r.city ? `<span>${esc(r.city)}</span>` : ''}${c ? `<span>Teinte ${esc(c.name)}</span>` : ''}${date ? `<span>${esc(date)}</span>` : ''}
+            ${r.verified && !preview ? `<span class="review__verified">${icon('check', 13, 2)}${esc(C.REVIEWS.verified)}</span>` : ''}</p>
+        </li>`;
+    }).join('');
   }
 
+  /* ======================================================================
+     13. APPARITIONS AU DÉFILEMENT
+     ====================================================================== */
   function initReveal() {
     if (reducedMotion.matches || !('IntersectionObserver' in window)) return;
     const els = $$('.reveal').filter((el) => el.getBoundingClientRect().top > window.innerHeight);
@@ -925,36 +912,31 @@
         e.target.classList.add('is-in');
         io.unobserve(e.target);
       });
-    }, { rootMargin: '0px 0px -10% 0px' });
+    }, { rootMargin: '0px 0px -8% 0px' });
     els.forEach((el) => { el.classList.add('is-pending'); io.observe(el); });
   }
 
   /* ======================================================================
-     12. DÉMARRAGE
+     14. DÉMARRAGE
      ====================================================================== */
   function init() {
-    renderTexts();
     renderAnnouncement();
     renderStatic();
     gallery.init();
     renderColors();
     initBundles();
     setColor(state.color.id, { silent: true });
-    updatePrice(false);
     initDelivery();
     initDialogs();
     initCart();
     initSticky();
     initPopup();
-    initCompare();
+    initReviews();
     initReveal();
-
     $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', goToOffers));
-
     track('ViewContent', { content_ids: [state.color.variantId], content_name: t(P.title), content_type: 'product', value: UNIT, currency: C.CURRENCY });
   }
 
-  // Exposé pour les tests / le débogage dans la console
   window.RN = { state, BUNDLES, computeDelivery, priceForKits, setColor, setBundle };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

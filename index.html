@@ -3,22 +3,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Kit 30 faux ongles en gel souple | RED NAILS</title>
-  <meta name="description" content="30 faux ongles en gel souple, forme amande, effet laqué. Pose en 10 minutes, réutilisables. 24,99 € le kit, soit 0,83 € l'ongle.">
-  <meta name="theme-color" content="#C8102E">
+  <title>Kit faux ongles en gel souple, effet laqué | RED NAILS</title>
+  <meta name="description" content="Faux ongles en gel souple, forme amande, finition laquée. Pose en 10 minutes, sans lampe UV, réutilisables. Jusqu'à -30 % sur les lots, livraison offerte dès 2 kits.">
+  <meta name="theme-color" content="#FBF7F4">
   <link rel="canonical" href="https://red-nails.fr/">
   <meta property="og:type" content="product">
   <meta property="og:site_name" content="RED NAILS">
-  <meta property="og:title" content="Kit 30 faux ongles en gel souple | RED NAILS">
-  <meta property="og:description" content="Pose en 10 minutes. 0,83 € l'ongle au lieu de 40 € la pose en institut.">
+  <meta property="og:title" content="Kit faux ongles en gel souple | RED NAILS">
+  <meta property="og:description" content="Une manucure laquée en 10 minutes, sans lampe UV. Jusqu'à -30 % sur les lots.">
   <meta property="og:url" content="https://red-nails.fr/">
+  <meta property="og:image" content="https://red-nails.fr/images/bordeaux/main.webp">
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
 
-  <!-- Polices : chargement non bloquant (performance) -->
+  <!-- Polices : Bodoni Moda (titres, prix) + Jost (texte). Chargement non bloquant. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Unbounded:wght@600..800&display=swap" media="print" onload="this.media='all'">
-  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=Unbounded:wght@600..800&display=swap"></noscript>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Jost:wght@300..600&display=swap" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Jost:wght@300..600&display=swap"></noscript>
 
   <link rel="preload" as="image" href="images/bordeaux/main.webp" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css">
@@ -29,24 +30,18 @@
 <body>
   <a class="skip-link" href="#produit">Aller au produit</a>
 
-  <!-- ==================================================================
-       1. BANDEAU PROMO DÉFILANT
-       ================================================================== -->
+  <!-- 1. BANDEAU DÉFILANT -->
   <div class="announce" role="region" aria-label="Offres en cours">
     <p class="sr-only" data-render="announce-sr"></p>
     <div class="announce__track" aria-hidden="true" data-render="announce"></div>
   </div>
 
-  <!-- ==================================================================
-       2. HEADER
-       ================================================================== -->
+  <!-- 2. HEADER -->
   <header class="site-header">
     <div class="container site-header__inner">
-      <a class="logo" href="#produit" aria-label="RED NAILS, retour au produit">
-        <span class="logo__red">RED</span> NAILS
-      </a>
+      <a class="logo" href="#produit"><span class="logo__red">RED</span> NAILS</a>
       <button class="cart-btn" type="button" data-open-cart aria-label="Ouvrir le panier, 0 article">
-        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7V6a3 3 0 0 1 6 0v1"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8h13l-1 12.5h-11L5.5 8Z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
         <span class="cart-btn__count" data-cart-count>0</span>
       </button>
     </div>
@@ -57,7 +52,6 @@
          3. FICHE PRODUIT
          ================================================================ -->
     <section id="produit" class="product" aria-labelledby="product-title">
-      <!-- Galerie -->
       <div class="product__gallery enter" style="--i:0">
         <div class="gallery is-first">
           <div class="gallery__viewport" id="gallery-viewport" tabindex="0"
@@ -67,183 +61,193 @@
               <div class="gallery__slide"><img src="images/bordeaux/main.webp" alt="Faux ongles Bordeaux en forme amande posés sur des mains" width="800" height="800" fetchpriority="high" decoding="async"></div>
             </div>
           </div>
+          <button class="gallery__arrow gallery__arrow--prev" type="button" data-gallery-prev>
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+            <span class="sr-only" data-t="TEXTS.product.prev"></span>
+          </button>
+          <button class="gallery__arrow gallery__arrow--next" type="button" data-gallery-next>
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+            <span class="sr-only" data-t="TEXTS.product.next"></span>
+          </button>
           <span class="gallery__count" aria-hidden="true" data-gallery-count>1 / 5</span>
-          <span class="gallery__hint" aria-hidden="true" data-gallery-hint>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6"/></svg>
-            <span data-gallery-hint-text></span>
-          </span>
+          <div class="gallery__dots" aria-hidden="true" data-render="dots"></div>
         </div>
         <div class="gallery__thumbs" data-render="thumbs" aria-label="Choisir une photo"></div>
       </div>
 
-      <!-- Infos -->
       <div class="product__info">
-        <p class="kicker enter" style="--i:1" data-t="PRODUCT.kicker"></p>
-        <h1 id="product-title" class="product__title enter" style="--i:2" data-t="PRODUCT.title"></h1>
-        <!-- Prix : élément le plus visible de la page (juste sous le titre, visible sans défiler) -->
-        <div class="price-box enter" style="--i:3" aria-live="polite">
-          <div class="price-box__row">
-            <span class="price-now" data-price-now></span>
-            <s class="price-was" data-price-was hidden></s>
-            <span class="price-badge" data-price-badge hidden></span>
-          </div>
-          <p class="per-nail">
-            <span class="per-nail__pre" data-t="TEXTS.product.perNailPrefix"></span>
-            <strong class="per-nail__val" data-per-nail></strong>
-            <span class="per-nail__suf" data-t="TEXTS.product.perNailSuffix"></span>
-          </p>
-        </div>
-        <ul class="promises enter" style="--i:4" data-render="promises"></ul>
-        <p class="salon-line enter" style="--i:5" data-salon-line></p>
+        <p class="eyebrow enter" style="--i:1" data-t="PRODUCT.eyebrow"></p>
+        <h1 id="product-title" class="product__title enter" style="--i:2">
+          <span data-title></span> <em data-title-accent></em>
+        </h1>
 
-        <!-- Sélecteur de couleur -->
-        <fieldset class="field enter" style="--i:6">
+        <!-- Note moyenne : affichée uniquement s'il existe de vrais avis -->
+        <a class="rating enter" style="--i:3" href="#avis" data-rating hidden></a>
+
+        <!-- Prix -->
+        <div class="price enter" style="--i:3" aria-live="polite">
+          <div class="price__row">
+            <span class="price__now" data-price-now></span>
+            <s class="price__was" data-price-was hidden></s>
+            <span class="price__badge" data-price-badge hidden></span>
+          </div>
+          <p class="price__meta" data-price-meta></p>
+        </div>
+
+        <ul class="promises enter" style="--i:4" data-render="promises"></ul>
+
+        <!-- Teinte -->
+        <fieldset class="field enter" style="--i:5">
           <legend class="field__legend">
             <span data-t="TEXTS.product.colorLegend"></span>
-            <strong data-color-name></strong>
+            <span class="field__value" data-color-name></span>
           </legend>
           <div class="swatches" data-render="swatches"></div>
         </fieldset>
 
-        <!-- Sélecteur de lots -->
-        <fieldset class="field enter" id="offres" style="--i:7">
+        <!-- Quantité / lots -->
+        <fieldset class="field enter" id="offres" style="--i:6">
           <legend class="field__legend"><span data-t="TEXTS.product.bundleLegend"></span></legend>
           <div class="bundles" data-render="bundles"></div>
         </fieldset>
 
-        <p class="ship-line enter" style="--i:8" data-ship-line></p>
+        <p class="ship-line enter" style="--i:7" data-ship-line></p>
 
         <!-- CTA principal -->
-        <button class="btn btn--primary btn--xl enter" style="--i:9" id="main-cta" type="button" data-add-current>
-          <span class="btn__dot" data-color-dot aria-hidden="true"></span>
-          <span data-add-label></span>
+        <button class="btn btn--primary btn--xl btn--glow enter" style="--i:8" id="main-cta" type="button" data-add-current>
+          <span class="btn__label" data-t="TEXTS.product.addToCart"></span>
+          <span class="btn__sep" aria-hidden="true"></span>
+          <span class="btn__price" data-cta-price></span>
         </button>
 
-        <!-- Promesse de livraison -->
-        <div class="eta enter" style="--i:10">
-          <p class="eta__text" data-eta-text></p>
-          <ol class="eta__steps" data-eta-steps></ol>
+        <!-- Livraison (ville de la visiteuse) -->
+        <div class="delivery enter" style="--i:9">
+          <p class="delivery__title" data-delivery-title></p>
+          <p class="delivery__text" data-eta-text></p>
+          <ol class="delivery__steps" data-eta-steps></ol>
         </div>
 
-        <!-- Réassurance -->
-        <ul class="reassure enter" style="--i:11" data-render="reassurance"></ul>
+        <ul class="reassure enter" style="--i:10" data-render="reassurance"></ul>
       </div>
     </section>
-
-    <!-- CTA répété n°1 (après le hero) -->
-    <div class="cta-band" data-render="cta"></div>
 
     <!-- ================================================================
-         4. LE CALCUL EST VITE FAIT
+         4. LE DÉTAIL (qualité du produit)
          ================================================================ -->
-    <section id="calcul" class="section section--dark reveal" aria-labelledby="compare-title">
-      <div class="container">
-        <p class="eyebrow eyebrow--light" data-t="TEXTS.compare.eyebrow"></p>
-        <h2 id="compare-title" class="section__title" data-t="TEXTS.compare.title"></h2>
-        <div class="compare">
-          <div class="compare__card compare__card--salon">
-            <p class="compare__label" data-t="TEXTS.compare.salonLabel"></p>
-            <p class="compare__value" data-t="TEXTS.compare.salonValue"></p>
-            <p class="compare__unit" data-t="TEXTS.compare.salonUnit"></p>
-          </div>
-          <span class="compare__vs" aria-hidden="true">VS</span>
-          <div class="compare__card compare__card--ours">
-            <p class="compare__label" data-t="TEXTS.compare.ourLabel"></p>
-            <p class="compare__value"><span data-counter></span></p>
-            <p class="compare__unit" data-t="TEXTS.compare.ourUnit"></p>
-          </div>
+    <section id="detail" class="section details reveal" aria-labelledby="details-title">
+      <div class="container details__grid">
+        <figure class="details__media">
+          <img data-detail-img src="images/bordeaux/main.webp" alt="" width="800" height="800" loading="lazy" decoding="async">
+        </figure>
+        <div class="details__content">
+          <p class="eyebrow" data-t="TEXTS.details.eyebrow"></p>
+          <h2 id="details-title" class="h2"><span data-t="TEXTS.details.title"></span> <em data-t="TEXTS.details.titleAccent"></em></h2>
+          <p class="lead" data-t="TEXTS.details.intro"></p>
+          <ol class="details__list" data-render="details"></ol>
         </div>
-        <p class="compare__line" data-t="TEXTS.compare.line"></p>
-        <div class="bars" aria-hidden="true">
-          <p class="bars__title" data-t="TEXTS.compare.barsTitle"></p>
-          <div class="bars__row"><span class="bars__label" data-t="TEXTS.compare.barSalon"></span><span class="bars__bar bars__bar--salon" data-bar="salon"></span><span class="bars__val" data-bar-val="salon"></span></div>
-          <div class="bars__row"><span class="bars__label" data-t="TEXTS.compare.barOurs"></span><span class="bars__bar bars__bar--ours" data-bar="ours"></span><span class="bars__val" data-bar-val="ours"></span></div>
-        </div>
-        <p class="compare__foot" data-t="TEXTS.compare.footnote"></p>
       </div>
     </section>
 
-    <!-- CTA répété n°2 (après la comparaison institut) -->
+    <!-- CTA répété n°1 -->
     <div class="cta-band" data-render="cta"></div>
 
     <!-- ================================================================
          5. COMMENT ÇA MARCHE
          ================================================================ -->
-    <section id="comment" class="section reveal" aria-labelledby="steps-title">
+    <section id="comment" class="section section--blush how reveal" aria-labelledby="steps-title">
       <div class="container">
-        <p class="eyebrow" data-t="TEXTS.steps.eyebrow"></p>
-        <h2 id="steps-title" class="section__title" data-t="TEXTS.steps.title"></h2>
-        <ol class="steps" data-render="steps"></ol>
+        <header class="section__head">
+          <p class="eyebrow" data-t="TEXTS.steps.eyebrow"></p>
+          <h2 id="steps-title" class="h2"><span data-t="TEXTS.steps.title"></span> <em data-t="TEXTS.steps.titleAccent"></em></h2>
+          <p class="lead" data-t="TEXTS.steps.intro"></p>
+        </header>
+        <div class="how__grid">
+          <ol class="steps" data-render="steps"></ol>
+          <figure class="how__media">
+            <img src="images/commun/guide-utilisation.webp" alt="Comment poser les faux ongles RED NAILS en 6 étapes" width="1200" height="1200" loading="lazy" decoding="async">
+          </figure>
+        </div>
+        <p class="how__done" data-done></p>
       </div>
     </section>
 
     <!-- ================================================================
-         6. CHOISIS TA COULEUR
+         6. LES TEINTES
          ================================================================ -->
-    <section id="couleurs" class="section section--tint reveal" aria-labelledby="colors-title">
+    <section id="teintes" class="section shades reveal" aria-labelledby="colors-title">
       <div class="container">
-        <p class="eyebrow" data-t="TEXTS.colors.eyebrow"></p>
-        <h2 id="colors-title" class="section__title" data-t="TEXTS.colors.title"></h2>
-        <p class="section__intro" data-t="TEXTS.colors.intro"></p>
-        <ul class="color-grid" data-render="color-cards"></ul>
+        <header class="section__head">
+          <p class="eyebrow" data-t="TEXTS.colors.eyebrow"></p>
+          <h2 id="colors-title" class="h2"><span data-t="TEXTS.colors.title"></span> <em data-t="TEXTS.colors.titleAccent"></em></h2>
+          <p class="lead" data-t="TEXTS.colors.intro"></p>
+        </header>
+        <ul class="shade-grid" data-render="color-cards"></ul>
       </div>
     </section>
 
-    <!-- CTA répété n°3 (après les couleurs) -->
+    <!-- CTA répété n°2 -->
     <div class="cta-band" data-render="cta"></div>
 
     <!-- ================================================================
-         7. CE QUE CONTIENT TON KIT
+         7. DANS TON KIT
          ================================================================ -->
-    <section id="kit" class="section reveal" aria-labelledby="kit-title">
-      <div class="container kit">
-        <div class="kit__media shine">
-          <img data-kit-img src="images/bordeaux/contenu-kit.webp" alt="" width="800" height="800" loading="lazy" decoding="async">
-        </div>
-        <div>
+    <section id="kit" class="section section--blush kit reveal" aria-labelledby="kit-title">
+      <div class="container kit__grid">
+        <figure class="kit__media">
+          <img data-kit-img src="images/bordeaux/contenu-kit.webp" alt="" width="1200" height="1200" loading="lazy" decoding="async">
+        </figure>
+        <div class="kit__content">
           <p class="eyebrow" data-t="TEXTS.kit.eyebrow"></p>
-          <h2 id="kit-title" class="section__title" data-t="TEXTS.kit.title"></h2>
-          <ul class="checklist" data-render="kit"></ul>
+          <h2 id="kit-title" class="h2"><span data-t="TEXTS.kit.title"></span> <em data-t="TEXTS.kit.titleAccent"></em></h2>
+          <ul class="kit__items" data-render="kit"></ul>
+          <h3 class="kit__specs-title" data-t="TEXTS.kit.specsTitle"></h3>
+          <dl class="specs" data-render="specs"></dl>
         </div>
       </div>
     </section>
 
     <!-- ================================================================
-         8. AVIS CLIENTS — section prévue, volontairement VIDE.
-         Aucun avis, aucune note, aucun nombre de clientes n'est inventé.
-         Pour l'activer : RN_CONFIG.REVIEWS.visible = true dans config.js.
-
-         BRANCHER UN MODULE D'AVIS VÉRIFIÉS ICI :
-         - Judge.me (Shopify) : remplacer le contenu de #reviews-widget par
-             <div class="jdgm-widget jdgm-review-widget" data-id="{{ product.id }}"></div>
-         - Loox (Shopify) : remplacer par
-             <div id="looxReviews" data-product-id="{{ product.id }}"></div>
-         (ou le bloc d'application correspondant dans l'éditeur de thème)
+         8. AVIS CLIENTES
+         Affichée uniquement avec de VRAIS avis (RN_CONFIG.REVIEWS.items) ou
+         via un module d'avis vérifiés. Aucun avis n'est inventé.
+         - Judge.me : <div class="jdgm-widget jdgm-review-widget" data-id="{{ product.id }}"></div>
+         - Loox     : <div id="looxReviews" data-product-id="{{ product.id }}"></div>
          ================================================================ -->
-    <section id="avis" class="section section--tint" aria-labelledby="reviews-title" hidden>
+    <section id="avis" class="section reviews" aria-labelledby="reviews-title" hidden>
       <div class="container">
-        <h2 id="reviews-title" class="section__title" data-t="REVIEWS.title"></h2>
-        <div id="reviews-widget"><!-- Widget d'avis vérifiés --></div>
+        <p class="reviews__notice" data-reviews-notice hidden></p>
+        <div class="reviews__head">
+          <div>
+            <p class="eyebrow" data-t="REVIEWS.eyebrow"></p>
+            <h2 id="reviews-title" class="h2" data-t="REVIEWS.title"></h2>
+          </div>
+          <div class="reviews__summary" data-reviews-summary></div>
+        </div>
+        <ul class="reviews__list" data-reviews-list></ul>
+        <div id="reviews-widget"></div>
       </div>
     </section>
 
     <!-- ================================================================
          9. FAQ
          ================================================================ -->
-    <section id="faq" class="section reveal" aria-labelledby="faq-title">
+    <section id="faq" class="section faq-section reveal" aria-labelledby="faq-title">
       <div class="container container--narrow">
-        <p class="eyebrow" data-t="TEXTS.faq.eyebrow"></p>
-        <h2 id="faq-title" class="section__title" data-t="TEXTS.faq.title"></h2>
+        <header class="section__head">
+          <p class="eyebrow" data-t="TEXTS.faq.eyebrow"></p>
+          <h2 id="faq-title" class="h2"><span data-t="TEXTS.faq.title"></span> <em data-t="TEXTS.faq.titleAccent"></em></h2>
+        </header>
         <div class="faq" data-render="faq"></div>
       </div>
     </section>
 
     <!-- ================================================================
-         10. CTA FINAL (CTA répété n°4, après la FAQ)
+         10. CTA FINAL
          ================================================================ -->
     <section class="final" aria-labelledby="final-title">
       <div class="container final__inner">
-        <h2 id="final-title" class="final__title" data-t="TEXTS.final.title"></h2>
+        <p class="eyebrow eyebrow--light" data-t="TEXTS.final.eyebrow"></p>
+        <h2 id="final-title" class="final__title"><span data-t="TEXTS.final.title"></span><br><em data-t="TEXTS.final.titleAccent"></em></h2>
         <p class="final__text" data-t="TEXTS.final.text"></p>
         <div class="cta-band cta-band--inverse" data-render="cta"></div>
       </div>
@@ -259,14 +263,14 @@
     </div>
   </footer>
 
-  <!-- Barre d'achat collante (mobile) -->
+  <!-- Barre d'achat collante (mobile) : visible dès l'arrivée -->
   <div class="sticky-buy" data-sticky aria-hidden="true" inert>
     <img class="sticky-buy__thumb" data-sticky-thumb src="images/bordeaux/main.webp" alt="" width="48" height="48">
     <div class="sticky-buy__info">
       <span class="sticky-buy__name" data-sticky-name></span>
       <span class="sticky-buy__price" data-sticky-price></span>
     </div>
-    <button class="btn btn--primary sticky-buy__btn" type="button" data-add-current data-t="TEXTS.product.stickyAdd"></button>
+    <button class="btn btn--primary btn--glow sticky-buy__btn" type="button" data-add-current data-t="TEXTS.product.stickyAdd"></button>
   </div>
 
   <!-- Tiroir panier (démo) -->
@@ -275,7 +279,7 @@
       <div class="drawer__head">
         <h2 id="cart-title" class="drawer__title" data-t="TEXTS.cart.title"></h2>
         <button class="icon-btn" type="button" data-close aria-label="Fermer le panier">
-          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         </button>
       </div>
       <div class="drawer__body" data-cart-body></div>
@@ -287,23 +291,21 @@
   <dialog class="popup" id="promo" aria-labelledby="promo-title">
     <div class="popup__panel">
       <button class="icon-btn popup__close" type="button" data-close aria-label="Fermer">
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
-      <p class="eyebrow" data-t="POPUP.eyebrow"></p>
-      <h2 id="promo-title" class="popup__title" data-t="POPUP.title"></h2>
+      <p class="eyebrow eyebrow--center" data-t="POPUP.eyebrow"></p>
+      <h2 id="promo-title" class="popup__title"><span data-t="POPUP.title"></span> <em data-t="POPUP.subtitle"></em></h2>
       <p class="popup__text" data-t="POPUP.text"></p>
       <div class="popup__code">
         <code data-t="POPUP.code"></code>
         <button class="btn btn--ghost" type="button" data-copy-code><span data-t="POPUP.copyLabel"></span></button>
       </div>
-      <button class="btn btn--primary btn--block" type="button" data-popup-cta><span data-t="POPUP.cta"></span></button>
+      <button class="btn btn--primary btn--block btn--glow" type="button" data-popup-cta><span data-t="POPUP.cta"></span></button>
       <button class="link-btn" type="button" data-close><span data-t="POPUP.dismiss"></span></button>
     </div>
   </dialog>
 
-  <!-- Annonces pour lecteurs d'écran -->
   <div class="sr-only" aria-live="polite" data-live></div>
-
   <noscript><p class="noscript">Active JavaScript pour commander sur red-nails.fr.</p></noscript>
 </body>
 </html>
