@@ -793,3 +793,38 @@ dialog::backdrop { background: rgba(23, 16, 15, .5); backdrop-filter: blur(3px);
 .shade[aria-pressed="true"] .shade__pill::after { content: none; }
 @media (max-width: 379px) { .shade__pill { font-size: .64rem; letter-spacing: .06em; padding: 8px; } }
 @media (prefers-reduced-motion: reduce) { .shade__pill::before { display: none; } }
+/* Cartes teintes = achat direct : bouton rouge sur toutes les cartes + rappel du lot */
+.shade__body { grid-template-rows: auto 1fr auto auto; }
+.shade[aria-pressed="true"] .shade__pill { background: var(--red); box-shadow: 0 10px 22px -14px rgba(200, 16, 46, .9); }
+.shade[aria-pressed="true"] .shade__pill::after { content: '→'; }
+.js .shade-grid.is-live .shade .shade__pill::before { animation: glintX 4.2s var(--ease) infinite; }
+.shade[aria-busy="true"] .shade__pill { background: var(--red-deep); }
+.shade[aria-busy="true"] .shade__pill::after { content: none; }
+.shade__meta { display: block; margin-top: 7px; text-align: center; font-size: .72rem; color: var(--muted); letter-spacing: .02em; }
+
+/* ---------- Pages légales ---------- */
+.legal-page .site-header__inner .link-btn { text-decoration: none; font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.legal { padding-top: 56px; }
+.legal .h2 { margin-bottom: 10px; }
+.legal .lead { margin: 18px 0 8px; }
+.legal h2 { font-family: var(--serif); font-size: 1.35rem; font-weight: 500; color: var(--ink); margin: 40px 0 12px; padding-top: 18px; border-top: 1px solid var(--line); scroll-margin-top: 16px; }
+.legal p, .legal li { color: var(--ink-2); font-size: .96rem; line-height: 1.7; }
+.legal p + p { margin-top: 10px; }
+.legal ul { list-style: disc; padding-left: 20px; display: grid; gap: 6px; }
+.legal a { color: var(--red); text-underline-offset: 3px; }
+.legal__updated { font-size: .82rem !important; color: var(--muted) !important; }
+.legal__note { font-size: .86rem !important; color: var(--muted) !important; font-style: italic; }
+.legal__box { margin-top: 14px; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-left: 2px solid var(--red); }
+.legal__box p { font-size: .9rem; }
+.legal__box--form { border-left-color: var(--ink); }
+.legal__toc { margin: 26px 0 8px; padding: 18px 20px; background: var(--blush); }
+.legal__toc ol { list-style: decimal; padding-left: 20px; columns: 2; column-gap: 28px; }
+.legal__toc li { font-size: .88rem; break-inside: avoid; margin-bottom: 4px; }
+.legal__toc a { color: var(--ink); text-decoration: none; }
+.legal__toc a:hover { text-decoration: underline; }
+mark.todo { background: #FDE3E7; color: var(--red-deep); padding: 1px 4px; font-weight: 500; border-radius: var(--r); }
+.contact-card { margin-top: 30px; padding: 26px; background: var(--paper); border: 1px solid var(--line); }
+.contact-card__mail { font-family: var(--serif); font-size: 1.4rem; margin: 4px 0 10px; }
+@media (max-width: 520px) { .legal__toc ol { columns: 1; } }
+@media (max-width: 699px) { .shade__pill { font-size: .68rem; letter-spacing: .05em; gap: 6px; padding: 10px 8px; white-space: nowrap; } .shade__pill::after { font-size: .85rem; } }
+@media (max-width: 379px) { .shade__pill { font-size: .62rem; letter-spacing: .02em; } .shade__pill::after { content: none; } }

@@ -156,7 +156,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 2, detailImage: 0, kitImage: 4,
+      thumbImage: 0, cardImage: 2, detailImage: 0, kitImage: 1,
     },
     {
       id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE',
@@ -167,7 +167,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 0, detailImage: 1, kitImage: 2,
+      thumbImage: 0, cardImage: 0, detailImage: 1, kitImage: 1,
     },
     {
       id: 'bleu-nuit', name: 'Bleu Nuit', hex: '#1B2A5E', variantId: 'VARIANT_BLEU_NUIT',
@@ -181,7 +181,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 4, detailImage: 1, kitImage: 5,
+      thumbImage: 0, cardImage: 4, detailImage: 1, kitImage: 4,
     },
     {
       id: 'rose-bonbon', name: 'Rose Bonbon', hex: '#D81B60', variantId: 'VARIANT_ROSE_BONBON',
@@ -193,7 +193,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
+      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 1,
     },
     {
       id: 'nude-rose', name: 'Nude Rosé', hex: '#EAC7C3', variantId: 'VARIANT_NUDE_ROSE',
@@ -206,7 +206,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 3, detailImage: 1, kitImage: 4,
+      thumbImage: 0, cardImage: 3, detailImage: 1, kitImage: 3,
     },
     {
       id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE',
@@ -218,7 +218,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
+      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 1,
     },
     {
       id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC',
@@ -230,7 +230,7 @@ window.RN_CONFIG = {
         KIT_CONTENT,
         USAGE_GUIDE,
       ],
-      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
+      thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 1,
     },
   ],
   DEFAULT_COLOR: 'bordeaux',
@@ -378,9 +378,11 @@ window.RN_CONFIG = {
       eyebrow: '{colorCount} teintes laquées',
       title: 'Trouve ta',
       titleAccent: 'teinte',
-      intro: 'Touche une teinte : elle s’affiche directement dans ta fiche produit.',
-      choose: 'Choisir cette teinte',
-      selected: 'Teinte choisie ✓',
+      intro: 'Choisis ta teinte et passe directement au paiement.',
+      buy: 'Commander · {price}',          // bouton des cartes : achat direct
+      buyMeta: '{bundle} · {shipping}',    // rappel sous le bouton
+      shippingPaid: 'livraison {shipping}',
+      redirecting: 'Paiement…',
       soon: 'Photos à venir',
     },
 

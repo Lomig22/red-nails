@@ -47,9 +47,19 @@
   const META_STANDARD = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead'];
   const CONSENT_KEY = 'rn_consent';
   const pixelQueue = []; // événements en attente de la réponse de la visiteuse
+  // Choix conservé 6 mois (recommandation CNIL), puis redemandé.
+  const CONSENT_MAX_AGE = 182 * 24 * 3600 * 1000;
   const consentStore = {
-    get() { try { return window.localStorage.getItem(CONSENT_KEY); } catch (e) { return null; } },
-    set(v) { try { window.localStorage.setItem(CONSENT_KEY, v); } catch (e) { /* ignoré */ } },
+    get() {
+      try {
+        const raw = window.localStorage.getItem(CONSENT_KEY);
+        if (!raw) return null;
+        const { v, t } = raw.charAt(0) === '{' ? JSON.parse(raw) : { v: raw, t: 0 };
+        if (!t || Date.now() - t > CONSENT_MAX_AGE) { window.localStorage.removeItem(CONSENT_KEY); return null; }
+        return v;
+      } catch (e) { return null; }
+    },
+    set(v) { try { window.localStorage.setItem(CONSENT_KEY, JSON.stringify({ v, t: Date.now() })); } catch (e) { /* ignoré */ } },
   };
   let pixelLoaded = false;
 
@@ -468,18 +478,33 @@
           <span class="shade__body">
             <span class="shade__name"><i style="${swatchStyle(c)}"></i>${esc(c.name)}</span>
             <span class="shade__desc">${esc(c.desc || '')}</span>
-            <span class="shade__pill" data-pill>${esc(c === state.color ? C.TEXTS.colors.selected : C.TEXTS.colors.choose)}</span>
+            <span class="shade__pill" data-pill></span>
+            <span class="shade__meta" data-pill-meta></span>
           </span>
         </button>
       </li>`;
     }).join('');
 
     $('[data-render="swatches"]').addEventListener('change', (e) => { if (e.target.name === 'color') setColor(e.target.value); });
+    // Carte teinte = achat direct : ajout au panier puis passage au paiement (pas de retour en haut).
     $('[data-render="color-cards"]').addEventListener('click', (e) => {
       const card = e.target.closest('[data-color-card]');
       if (!card) return;
-      setColor(card.dataset.colorCard);
-      $('#produit').scrollIntoView({ behavior: reducedMotion.matches ? 'auto' : 'smooth', block: 'start' });
+      const color = COLORS.find((c) => c.id === card.dataset.colorCard);
+      if (!color) return;
+      $('[data-pill]', card).textContent = C.TEXTS.colors.redirecting;
+      card.setAttribute('aria-busy', 'true');
+      buyNow(color, currentBundle().qty);
+    });
+    updateShadeButtons();
+  }
+
+  /** Libellés des boutons des cartes teintes : "Commander · 39,98 €" + rappel du lot. */
+  function updateShadeButtons() {
+    const b = currentBundle();
+    $$('[data-color-card]').forEach((card) => {
+      $('[data-pill]', card).textContent = t(C.TEXTS.colors.buy, { price: money(b.price) });
+      $('[data-pill-meta]', card).textContent = t(C.TEXTS.colors.buyMeta, { bundle: b.label, shipping: b.freeShipping ? C.TEXTS.product.freeShipping.toLowerCase() : t(C.TEXTS.colors.shippingPaid) });
     });
   }
 
@@ -494,7 +519,6 @@
     $$('[data-color-card]').forEach((card) => {
       const on = card.dataset.colorCard === id;
       card.setAttribute('aria-pressed', String(on));
-      $('[data-pill]', card).textContent = on ? C.TEXTS.colors.selected : C.TEXTS.colors.choose;
     });
     const thumb = pick(color, 'thumbImage', 0);
     $('[data-sticky-thumb]').src = thumb.src;
@@ -582,6 +606,7 @@
     if (animate && !reducedMotion.matches) { now.classList.remove('is-added'); void now.offsetWidth; now.classList.add('is-added'); }
 
     $('[data-cta-price]').textContent = money(b.price);
+    if ($('[data-pill]')) updateShadeButtons();
     const ship = $('[data-ship-line]');
     ship.classList.toggle('is-free', b.freeShipping);
     ship.innerHTML = icon(b.freeShipping ? 'check' : 'truck', 16) + `<span>${esc(t(b.freeShipping ? tx.shippingFree : tx.shippingPaid))}</span>`;
@@ -708,7 +733,7 @@
    * Ajoute au panier. Point d'entrée unique, appelé par tous les boutons.
    * Portage Shopify : remplacer le contenu par fetch('/cart/add.js', …) (README).
    */
-  function addToCart(variantId, qty) {
+  function addToCart(variantId, qty, opts = {}) {
     qty = Math.max(1, parseInt(qty, 10) || 1);
     const color = C.COLORS.find((c) => c.variantId === variantId) || state.color;
     const line = state.cart.find((l) => l.variantId === variantId);
@@ -719,10 +744,23 @@
     const btn = $('[data-open-cart]');
     btn.classList.remove('is-bump'); void btn.offsetWidth; btn.classList.add('is-bump');
     live(`${C.TEXTS.cart.added} : ${qty} kit(s) ${color.name}`);
-    openDialog(cartEl());
+    if (opts.openCart !== false) openDialog(cartEl());
     return Promise.resolve(state.cart);
   }
   window.addToCart = addToCart;
+
+  /**
+   * Achat direct (cartes teintes) : ajoute le lot choisi puis envoie au paiement.
+   * Mode démo : la page de paiement n'existe pas encore, on ouvre le panier à la place.
+   * Shopify : addToCart (fetch /cart/add.js) puis redirection vers /checkout.
+   */
+  function buyNow(color, qty) {
+    addToCart(color.variantId, qty, { openCart: false }).then(() => {
+      track('InitiateCheckout', { value: state.cart.reduce((s, l) => s + priceForKits(l.kits), 0), currency: C.CURRENCY, num_items: totalKits() });
+      if (C.DEMO_MODE) { openDialog(cartEl()); updateShadeButtons(); return; }
+      window.location.href = checkoutUrl();
+    });
+  }
 
   function checkoutUrl() {
     if (C.CART_PERMALINK_BASE && state.cart.length) {
