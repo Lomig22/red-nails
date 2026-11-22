@@ -23,6 +23,36 @@
 
   <link rel="preload" as="image" href="images/bordeaux/main.webp" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Meta Pixel Code — ID 2750897045307789
+       Code de base officiel de Meta, chargé UNIQUEMENT après « Accepter » dans la
+       bannière cookies (CNIL). Au retour d'une visiteuse qui a déjà accepté
+       (choix conservé 6 mois), il se charge dès le <head>. Le <noscript><img>
+       officiel n'est pas inclus : il enverrait un PageView sans consentement. -->
+  <script>
+    window.rnLoadMetaPixel = function () {
+      if (window.fbq) return;
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      // Le changement d'URL au choix d'une teinte (?couleur=…) ne doit pas compter comme une nouvelle page vue
+      fbq.disablePushState = true;
+      fbq('init', '2750897045307789');
+      fbq('track', 'PageView');
+    };
+    (function () {
+      try {
+        var c = JSON.parse(localStorage.getItem('rn_consent') || 'null');
+        if (c && c.v === 'granted' && Date.now() - c.t < 182 * 864e5) window.rnLoadMetaPixel();
+      } catch (e) { /* stockage indisponible : on attend le choix dans la bannière */ }
+    })();
+  </script>
+  <!-- End Meta Pixel Code -->
   <script>document.documentElement.classList.add('js');</script>
   <script src="config.js" defer></script>
   <script src="app.js" defer></script>

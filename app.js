@@ -63,21 +63,33 @@
   };
   let pixelLoaded = false;
 
-  /** Charge le pixel Meta (code officiel), seulement après consentement. */
+  /**
+   * Charge le pixel Meta, seulement après consentement.
+   * Utilise le code de base officiel placé dans le <head> d'index.html
+   * (window.rnLoadMetaPixel : init + PageView). S'il a déjà été chargé dans le
+   * <head> (visiteuse ayant accepté lors d'une visite précédente), on ne le recharge pas.
+   */
   function loadMetaPixel() {
     if (pixelLoaded || !C.META_PIXEL_ID) return;
     pixelLoaded = true;
-    /* eslint-disable */
-    !function (f, b, e, v, n, t, s) {
-      if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
-      if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
-      n.queue = []; t = b.createElement(e); t.async = !0;
-      t.src = v; s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s);
-    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-    /* eslint-enable */
-    window.fbq('init', C.META_PIXEL_ID);
-    window.fbq('track', 'PageView');
+    if (typeof window.fbq !== 'function') {
+      if (typeof window.rnLoadMetaPixel === 'function') {
+        window.rnLoadMetaPixel();
+      } else {
+        // Secours (pages sans le code du <head>) : même code officiel
+        /* eslint-disable */
+        !function (f, b, e, v, n, t, s) {
+          if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+          if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+          n.queue = []; t = b.createElement(e); t.async = !0;
+          t.src = v; s = b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t, s);
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        /* eslint-enable */
+        window.fbq('init', C.META_PIXEL_ID);
+        window.fbq('track', 'PageView');
+      }
+    }
     while (pixelQueue.length) sendToPixels(...pixelQueue.shift());
   }
 
@@ -763,7 +775,8 @@
       const value = priceForKits(qty);
       const name = `${t(P.title, colorVars(color))} – ${color.name}`;
       track('AddToCart', { content_ids: [color.variantId], content_name: name, content_type: 'product', quantity: qty, value, currency: C.CURRENCY });
-      track('InitiateCheckout', { content_ids: [color.variantId], content_name: name, value, currency: C.CURRENCY, num_items: qty });
+      // InitiateCheckout AVANT la redirection : "Bordeaux – 2 kits", valeur du lot en EUR
+      track('InitiateCheckout', { content_ids: [color.variantId], content_name: `${color.name} – ${qty} kit${qty > 1 ? 's' : ''}`, content_type: 'product', value, currency: 'EUR', num_items: qty });
       // Commande en cours, relue par merci.html pour l'événement Achat (valeur réelle)
       try {
         window.localStorage.setItem('rn_pending_order', JSON.stringify({
@@ -778,7 +791,8 @@
       }
       live(C.TEXTS.product.redirecting);
       // petit délai pour laisser partir les événements du pixel avant de quitter la page
-      setTimeout(() => { window.location.href = url; }, pixelLoaded ? 350 : 0);
+      // 300 ms pour laisser partir les événements du pixel avant de quitter la page
+      setTimeout(() => { window.location.href = url; }, pixelLoaded ? 300 : 0);
       return;
     }
     addToCart(color.variantId, qty, { openCart: false }).then(() => {
@@ -1105,7 +1119,8 @@
       $$('[data-cta-offers]').forEach((b) => { b.textContent = t(C.TEXTS.cta); });
       updateShadeButtons();
     });
-    track('ViewContent', { content_ids: [state.color.variantId], content_name: t(P.title), content_type: 'product', value: UNIT, currency: C.CURRENCY });
+    // ViewContent au chargement de la fiche produit : valeur = prix du lot sélectionné
+    track('ViewContent', { content_ids: [state.color.variantId], content_name: 'Kit 30 faux ongles gel souple', content_type: 'product', value: currentBundle().price, currency: 'EUR' });
   }
 
   window.RN = { state, BUNDLES, computeDelivery, priceForKits, setColor, setBundle };
