@@ -968,6 +968,18 @@
     els.forEach((el) => { el.classList.add('is-pending'); io.observe(el); });
   }
 
+  /** Les boutons "illuminés" ne s'animent que lorsqu'ils sont à l'écran (fluidité, batterie). */
+  function initGlow() {
+    const live = (b) => b.classList.add('is-live');
+    if (!('IntersectionObserver' in window)) { $$('.btn--glow').forEach(live); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => e.target.classList.toggle('is-live', e.isIntersecting));
+    });
+    $$('.btn--glow').forEach((b) => io.observe(b));
+    // boutons créés plus tard (tiroir panier) : toujours animés
+    new MutationObserver(() => $$('.drawer .btn--glow').forEach(live)).observe($('[data-cart-foot]'), { childList: true });
+  }
+
   /* ======================================================================
      14. DÉMARRAGE
      ====================================================================== */
@@ -986,6 +998,7 @@
     initReviews();
     initReveal();
     initConsent();
+    initGlow();
     $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', goToOffers));
     track('ViewContent', { content_ids: [state.color.variantId], content_name: t(P.title), content_type: 'product', value: UNIT, currency: C.CURRENCY });
   }

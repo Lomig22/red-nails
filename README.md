@@ -163,7 +163,7 @@ Le bloc livraison affiche « Livraison à Marseille » grâce à la ville devin�
 
 ### Design
 
-- Polices : **Bodoni Moda** (titres, prix) et **Jost** (texte), chargées depuis Google Fonts.
+- Polices : **Fraunces** (titres, prix) et **Jost** (texte), chargées depuis Google Fonts.
 - Couleurs : variables en haut de `styles.css` (`--red`, `--ink`, `--bg`…).
 - Les boutons d'achat « s'illuminent » (halo + reflet) : classe `btn--glow`, coupée si la visiteuse
   a activé la réduction des animations.

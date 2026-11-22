@@ -1,7 +1,7 @@
 /* ==========================================================================
    RED NAILS — styles.css
    Direction artistique : "laque & précision" — éditorial beauté.
-   Bodoni Moda (titres, prix) · Jost (texte) · rouge cerise · porcelaine.
+   Fraunces (titres, prix) · Jost (texte) · rouge cerise · porcelaine.
    Mobile-first. Sommaire :
      1. Variables & base          7. Sections : détail, mode d'emploi, teintes, kit
      2. Utilitaires & typo        8. Avis, FAQ, CTA final, footer
@@ -16,8 +16,8 @@
   --red: #C8102E;          /* rouge cerise signature : 5,9:1 sur blanc */
   --red-deep: #A00C24;
   --ink: #17100F;          /* noir laqué */
-  --ink-2: #3B302E;
-  --muted: #6B5E5B;        /* 5,6:1 sur la porcelaine */
+  --ink-2: #2E2523;
+  --muted: #5C4F4C;        /* 7:1 sur la porcelaine */
   --bg: #FBF7F4;           /* porcelaine */
   --paper: #FFFFFF;
   --blush: #F5ECE7;        /* nude poudré pour les panneaux */
@@ -25,7 +25,7 @@
   --line-2: #D6C7C0;
   --green: #1D6A46;
 
-  --serif: 'Bodoni Moda', 'Bodoni 72', Didot, 'Times New Roman', serif;
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --sans: 'Jost', 'Futura', 'Avenir Next', 'Helvetica Neue', Arial, sans-serif;
 
   --r: 2px;
@@ -94,10 +94,9 @@ em { font-style: italic; }
 .h2 {
   font-family: var(--serif); font-weight: 500; color: var(--ink);
   font-size: clamp(2.1rem, 9vw, 3.6rem); line-height: 1.02; letter-spacing: -.015em;
-  font-variation-settings: 'opsz' 72;
 }
 .h2 em, .product__title em, .final__title em, .popup__title em { color: var(--red); font-weight: 400; }
-.lead { font-size: 1.02rem; color: var(--muted); max-width: 54ch; margin-top: 16px; font-weight: 300; }
+.lead { font-size: 1.02rem; color: var(--muted); max-width: 54ch; margin-top: 16px; font-weight: 400; }
 
 .section { padding: 76px 0; }
 .section--blush { background: var(--blush); }
@@ -119,7 +118,6 @@ em { font-style: italic; }
 .logo {
   font-family: var(--serif); font-weight: 600; font-size: 1.28rem; letter-spacing: .2em;
   text-decoration: none; color: var(--ink); min-height: 44px; display: inline-flex; align-items: center; gap: .42em;
-  font-variation-settings: 'opsz' 28;
 }
 .logo__red { color: var(--red); }
 .logo--light { color: #fff; }
@@ -199,7 +197,6 @@ em { font-style: italic; }
 .product__title {
   font-family: var(--serif); font-weight: 500; color: var(--ink);
   font-size: clamp(2rem, 8.4vw, 3rem); line-height: 1.02; letter-spacing: -.015em;
-  font-variation-settings: 'opsz' 72;
 }
 .product__title em { display: block; }
 
@@ -217,9 +214,9 @@ em { font-style: italic; }
 .price__now {
   font-family: var(--serif); font-weight: 600; color: var(--ink);
   font-size: clamp(2.4rem, 10vw, 3.1rem); line-height: 1; letter-spacing: -.02em;
-  font-variant-numeric: lining-nums; font-variation-settings: 'opsz' 96;
+  font-variant-numeric: lining-nums;
 }
-.price__was { font-size: 1.15rem; font-weight: 300; color: var(--muted); text-decoration-thickness: 1px; }
+.price__was { font-size: 1.15rem; font-weight: 400; color: var(--muted); text-decoration-thickness: 1px; }
 .price__badge {
   align-self: center; background: var(--red); color: #fff; font-size: .72rem; font-weight: 500;
   letter-spacing: .12em; padding: 5px 9px 4px; border-radius: var(--r);
@@ -284,7 +281,7 @@ em { font-style: italic; }
 .bundle__ship { display: inline-flex; align-items: center; gap: 5px; font-size: .74rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--green); }
 .bundle__price { display: grid; justify-items: end; }
 .bundle__price strong { font-family: var(--serif); font-size: 1.28rem; font-weight: 600; color: var(--ink); line-height: 1.1; }
-.bundle__price s { font-size: .82rem; font-weight: 300; color: var(--muted); }
+.bundle__price s { font-size: .82rem; font-weight: 400; color: var(--muted); }
 .bundle__flag {
   position: absolute; top: -9px; right: 14px; background: var(--ink); color: #fff;
   font-size: .6rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; padding: 3px 9px 2px; border-radius: var(--r);
@@ -373,16 +370,16 @@ em { font-style: italic; }
 .details__list li { display: grid; grid-template-columns: 54px 1fr; gap: 4px 12px; padding: 20px 0; border-bottom: 1px solid var(--line); }
 .details__num { grid-row: span 2; font-family: var(--serif); font-style: italic; font-size: .95rem; color: var(--red); padding-top: 4px; }
 .details__title { font-family: var(--serif); font-size: 1.35rem; font-weight: 500; color: var(--ink); line-height: 1.2; }
-.details__text { font-size: .94rem; color: var(--muted); font-weight: 300; }
+.details__text { font-size: .94rem; color: var(--muted); font-weight: 400; }
 
 /* Mode d'emploi */
 .how__grid { display: grid; gap: 32px; }
 .steps { display: grid; gap: 0; border-top: 1px solid var(--line-2); }
 .step { display: grid; grid-template-columns: 58px 1fr; gap: 6px 14px; padding: 24px 0; border-bottom: 1px solid var(--line-2); }
-.step__num { grid-row: span 4; font-family: var(--serif); font-size: 2.6rem; font-weight: 500; line-height: .9; color: var(--red); font-variation-settings: 'opsz' 96; }
+.step__num { grid-row: span 4; font-family: var(--serif); font-size: 2.6rem; font-weight: 500; line-height: .9; color: var(--red); }
 .step__time { justify-self: start; font-size: .64rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); border: 1px solid var(--line-2); padding: 3px 8px 2px; border-radius: var(--r); }
 .step__title { font-family: var(--serif); font-size: 1.4rem; font-weight: 500; color: var(--ink); line-height: 1.2; margin-top: 4px; }
-.step__text { font-size: .95rem; font-weight: 300; }
+.step__text { font-size: .95rem; font-weight: 400; }
 .step__tip { font-size: .86rem; color: var(--muted); font-style: italic; font-family: var(--serif); }
 .step__tip b { font-family: var(--sans); font-style: normal; font-weight: 500; font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--red); margin-right: 6px; }
 .how__media { background: var(--paper); border-radius: var(--r); overflow: hidden; }
@@ -405,7 +402,7 @@ em { font-style: italic; }
 .shade__body { display: grid; gap: 4px; padding: 12px 2px 4px; align-content: start; }
 .shade__name { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-size: 1.12rem; font-weight: 500; color: var(--ink); }
 .shade__name i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .12); flex: none; }
-.shade__desc { font-size: .8rem; color: var(--muted); line-height: 1.45; font-weight: 300; }
+.shade__desc { font-size: .8rem; color: var(--muted); line-height: 1.45; font-weight: 400; }
 .shade__pill { justify-self: start; margin-top: 6px; font-size: .64rem; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 2px; }
 .shade[aria-pressed="true"] .shade__media { box-shadow: inset 0 0 0 1.5px var(--ink); }
 .shade[aria-pressed="true"] .shade__pill { color: var(--red); border-color: var(--red); }
@@ -415,9 +412,9 @@ em { font-style: italic; }
 .kit__media { background: var(--paper); border-radius: var(--r); overflow: hidden; }
 .kit__items { margin-top: 28px; border-top: 1px solid var(--line-2); }
 .kit__items li { display: grid; grid-template-columns: 70px 1fr; gap: 2px 14px; padding: 18px 0; border-bottom: 1px solid var(--line-2); }
-.kit__qty { grid-row: span 2; font-family: var(--serif); font-size: 2.5rem; font-weight: 500; color: var(--red); line-height: .95; font-variation-settings: 'opsz' 96; }
+.kit__qty { grid-row: span 2; font-family: var(--serif); font-size: 2.5rem; font-weight: 500; color: var(--red); line-height: .95; }
 .kit__name { font-family: var(--serif); font-size: 1.2rem; font-weight: 500; color: var(--ink); line-height: 1.2; }
-.kit__text { font-size: .9rem; color: var(--muted); font-weight: 300; }
+.kit__text { font-size: .9rem; color: var(--muted); font-weight: 400; }
 .kit__specs-title { margin-top: 34px; font-size: .7rem; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--ink); }
 .specs { margin-top: 12px; border-top: 1px solid var(--ink); }
 .specs div { display: grid; grid-template-columns: 42% 1fr; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line-2); font-size: .9rem; }
@@ -440,7 +437,7 @@ em { font-style: italic; }
 .review__photo { aspect-ratio: 1; overflow: hidden; border-radius: var(--r); margin: -6px -6px 4px; }
 .review__photo img { width: 100%; height: 100%; object-fit: cover; }
 .review__title { font-family: var(--serif); font-size: 1.2rem; font-weight: 500; color: var(--ink); }
-.review__text { font-size: .92rem; font-weight: 300; }
+.review__text { font-size: .92rem; font-weight: 400; }
 .review__meta { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-size: .76rem; color: var(--muted); padding-top: 10px; border-top: 1px solid var(--line); }
 .review__meta b { color: var(--ink); font-weight: 500; }
 .review__verified { display: inline-flex; align-items: center; gap: 4px; color: var(--green); font-weight: 500; }
@@ -458,7 +455,7 @@ em { font-style: italic; }
   transition: transform .35s var(--ease);
 }
 .faq details[open] summary::after { transform: rotate(45deg); }
-.faq__answer { padding: 0 32px 22px 0; color: var(--muted); font-weight: 300; }
+.faq__answer { padding: 0 32px 22px 0; color: var(--muted); font-weight: 400; }
 .faq details[open] .faq__answer { animation: fadeDown .4s var(--ease); }
 
 .final { background: var(--red); color: #fff; padding: 84px 0 64px; text-align: center; position: relative; overflow: hidden; }
@@ -467,7 +464,7 @@ em { font-style: italic; }
 .final .eyebrow { justify-content: center; }
 .final__title { font-family: var(--serif); font-weight: 500; font-size: clamp(2.2rem, 9vw, 4rem); line-height: 1.04; letter-spacing: -.015em; }
 .final__title em { color: #fff; opacity: .92; }
-.final__text { margin-top: 18px; font-size: 1rem; font-weight: 300; max-width: 44ch; color: rgba(255, 255, 255, .9); }
+.final__text { margin-top: 18px; font-size: 1rem; font-weight: 400; max-width: 44ch; color: rgba(255, 255, 255, .9); }
 
 .footer { background: var(--ink); color: #E6DBD6; padding: 48px 0 calc(36px + env(safe-area-inset-bottom)); }
 .footer__inner { display: grid; gap: 16px; justify-items: center; text-align: center; }
@@ -492,7 +489,7 @@ em { font-style: italic; }
 .sticky-buy__info { display: grid; line-height: 1.2; min-width: 0; }
 .sticky-buy__name { font-size: .62rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sticky-buy__price { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; color: var(--ink); white-space: nowrap; }
-.sticky-buy__price s { font-family: var(--sans); font-weight: 300; font-size: .78rem; color: var(--muted); margin-left: 6px; }
+.sticky-buy__price s { font-family: var(--sans); font-weight: 400; font-size: .78rem; color: var(--muted); margin-left: 6px; }
 .sticky-buy__btn { min-height: 50px; padding: 12px 22px; }
 
 dialog { color: var(--ink-2); }
@@ -513,7 +510,7 @@ dialog::backdrop { background: rgba(23, 16, 15, .5); backdrop-filter: blur(3px);
 .line__title { font-family: var(--serif); font-size: 1.02rem; font-weight: 500; color: var(--ink); line-height: 1.25; }
 .line__meta { font-size: .78rem; color: var(--muted); }
 .line__price { text-align: right; font-family: var(--serif); font-weight: 600; font-size: 1.05rem; color: var(--ink); }
-.line__price s { display: block; font-family: var(--sans); font-weight: 300; font-size: .76rem; color: var(--muted); }
+.line__price s { display: block; font-family: var(--sans); font-weight: 400; font-size: .76rem; color: var(--muted); }
 .qty { display: inline-flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--r); margin-top: 8px; }
 .qty button { width: 40px; height: 40px; border: 0; background: none; font-size: 1.1rem; }
 .qty span { min-width: 22px; text-align: center; font-weight: 500; }
@@ -705,3 +702,63 @@ dialog::backdrop { background: rgba(23, 16, 15, .5); backdrop-filter: blur(3px);
 .footer__cookies { color: #BCAEA9; font-size: .72rem; letter-spacing: .1em; }
 .footer__cookies:hover { color: #fff; }
 .logo__red { margin-right: .42em; }
+
+/* ==========================================================================
+   LISIBILITÉ — Fraunces (traits plus solides, taille optique automatique)
+   + textes et petites capitales plus lisibles sur mobile.
+   ========================================================================== */
+:root { --serif: 'Fraunces', Georgia, 'Times New Roman', serif; }
+.h2, .product__title, .final__title, .popup__title, .price__now, .bundle__title, .bundle__price strong,
+.details__title, .step__title, .step__num, .kit__name, .kit__qty, .shade__name, .faq summary,
+.review__title, .reviews__avg, .delivery__title, .drawer__title, .line__title, .line__price,
+.sum-row--total, .sticky-buy__price, .field__value, .logo, .btn__price, .details__num, .step__tip, .footer__tagline {
+  font-family: var(--serif); font-optical-sizing: auto;
+}
+/* Logo : plus affirmé */
+.logo { font-weight: 700; letter-spacing: .16em; font-size: 1.32rem; }
+/* Titres */
+.product__title { font-weight: 500; letter-spacing: -.02em; line-height: 1.05; }
+.h2 { font-weight: 500; letter-spacing: -.02em; }
+.h2 em, .product__title em, .final__title em, .popup__title em { font-weight: 400; }
+/* Prix : chiffres nets et bien lisibles */
+.price__now { font-weight: 600; letter-spacing: -.025em; }
+.price__was { font-size: 1.1rem; font-weight: 400; }
+.bundle__title { font-weight: 600; font-size: 1.15rem; }
+.bundle__price strong { font-weight: 600; }
+.sticky-buy__price, .btn__price, .line__price, .sum-row--total { font-weight: 600; }
+.popup__title span { font-weight: 600; }
+/* Titres de rubriques */
+.details__title, .step__title, .kit__name, .shade__name, .review__title, .delivery__title { font-weight: 500; }
+.faq summary { font-weight: 500; font-size: 1.1rem; }
+.step__num, .kit__qty { font-weight: 500; }
+/* Texte courant : normal (plus de "light"), un cran plus foncé */
+.lead, .details__text, .step__text, .kit__text, .shade__desc, .faq__answer, .review__text, .final__text { font-weight: 400; }
+.lead, .details__text, .kit__text, .faq__answer { color: var(--ink-2); }
+/* Petites capitales : plus grandes, moins espacées */
+.eyebrow { font-size: .74rem; letter-spacing: .2em; color: var(--ink-2); }
+.field__legend { font-size: .74rem; letter-spacing: .18em; color: var(--ink-2); }
+.field__value { font-size: 1.08rem; }
+.promises li { font-size: .74rem; color: var(--ink); }
+.reassure strong { font-size: .7rem; letter-spacing: .1em; }
+.reassure span, .eta__date { font-size: .78rem; }
+.eta__label { font-size: .68rem; }
+.bundle__flag { font-size: .64rem; letter-spacing: .14em; }
+.bundle__sub { font-size: .86rem; }
+.bundle__ship { font-size: .76rem; }
+.step__time, .specs dt, .shade__pill, .sticky-buy__name, .shade__soon { font-size: .7rem; letter-spacing: .14em; }
+.btn { font-size: .82rem; letter-spacing: .16em; font-weight: 600; }
+.btn--xl { font-size: .86rem; }
+.announce__item { font-size: .72rem; letter-spacing: .16em; }
+.footer__links a { font-size: .76rem; }
+@media (max-width: 379px) {
+  .btn { letter-spacing: .1em; }
+  .promises li { font-size: .68rem; letter-spacing: .04em; }
+  .reassure strong { font-size: .64rem; letter-spacing: .06em; }
+}
+.eyebrow.eyebrow--light { color: #fff; }
+
+/* Performance : reflet animé via transform (pas de recalcul de mise en page),
+   et animations en pause pour les boutons hors écran (classe .is-live posée par app.js). */
+.btn--glow::after { left: 0; width: 45%; transform: translateX(-130%) skewX(-18deg); animation-name: glintX; will-change: transform; }
+@keyframes glintX { 0% { transform: translateX(-130%) skewX(-18deg); } 55%, 100% { transform: translateX(260%) skewX(-18deg); } }
+.js .btn--glow:not(.is-live), .js .btn--glow:not(.is-live)::after { animation-play-state: paused; }

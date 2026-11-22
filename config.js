@@ -221,8 +221,6 @@ window.RN_CONFIG = {
       ],
       thumbImage: 0, cardImage: 1, detailImage: 0, kitImage: 3,
     },
-    // En attente de photos : visuels provisoires. "hidden: true" pour la masquer.
-    { id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE', desc: 'Le rouge signature, brillant comme un vernis laqué.' },
   ],
   DEFAULT_COLOR: 'bordeaux',
 
