@@ -521,14 +521,20 @@
       if (!color) return;
       $('[data-pill]', card).textContent = C.TEXTS.colors.redirecting;
       card.setAttribute('aria-busy', 'true');
-      buyNow(color, currentBundle().qty);
+      buyNow(color, shadeBundle().qty);
     });
     updateShadeButtons();
   }
 
-  /** Libellés des boutons des cartes teintes : "Commander · 39,98 €" + rappel du lot. */
+  /**
+   * Lot proposé par les cartes teintes : toujours 1 kit (24,99 €), indépendamment
+   * du lot sélectionné dans la fiche produit (réglable : C.SHADE_CARD_QTY).
+   */
+  const shadeBundle = () => BUNDLES.find((b) => b.qty === (C.SHADE_CARD_QTY || 1)) || BUNDLES[0];
+
+  /** Libellés des boutons des cartes teintes : "Commander · 24,99 €" + "1 kit · livraison 3,99 €". */
   function updateShadeButtons() {
-    const b = currentBundle();
+    const b = shadeBundle();
     $$('[data-color-card]').forEach((card) => {
       $('[data-pill]', card).textContent = t(C.TEXTS.colors.buy, { price: money(b.price) });
       $('[data-pill-meta]', card).textContent = t(C.TEXTS.colors.buyMeta, { bundle: b.label, shipping: b.freeShipping ? C.TEXTS.product.freeShipping.toLowerCase() : t(C.TEXTS.colors.shippingPaid) });

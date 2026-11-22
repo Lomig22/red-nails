@@ -103,6 +103,9 @@ window.RN_CONFIG = {
   // Le lot de 2 affiche directement un prix barré légal + la livraison offerte.
   DEFAULT_BUNDLE: 1,
   CTA_PRESELECT_BEST: false,
+  // Cartes de la section "Trouve ta teinte" : nombre de kits commandés au clic
+  // (1 = "Commander · 24,99 €", quel que soit le lot choisi plus haut).
+  SHADE_CARD_QTY: 1,
 
   /* ---------- Livraison ---------- */
   SHIPPING: {
