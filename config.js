@@ -252,6 +252,10 @@ window.RN_CONFIG = {
     },
   ],
   DEFAULT_COLOR: 'bordeaux',
+  // false = on arrive TOUJOURS sur DEFAULT_COLOR et DEFAULT_BUNDLE, quelle que soit
+  // l'adresse. true = un lien ?couleur=rouge-cerise&lot=3 présélectionne teinte et lot
+  // (utile pour une pub dédiée à une autre teinte).
+  URL_PRESELECT: false,
 
   /* Visuels par défaut d'une couleur sans "images" (générés par tools/) */
   IMAGE_EXT: 'svg',

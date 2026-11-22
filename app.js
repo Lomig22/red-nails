@@ -194,8 +194,19 @@
   /* ======================================================================
      2. ÉTAT & IMAGES
      ====================================================================== */
-  const urlColor = COLORS.find((c) => c.id === params.get('couleur'));
-  const urlBundle = BUNDLES.findIndex((b) => String(b.qty) === params.get('lot'));
+  // Teinte / lot imposés par l'adresse (?couleur=…&lot=…) : désactivé par défaut
+  // (URL_PRESELECT: false) pour que chaque arrivée tombe sur la teinte des pubs.
+  const urlColor = C.URL_PRESELECT ? COLORS.find((c) => c.id === params.get('couleur')) : null;
+  const urlBundle = C.URL_PRESELECT ? BUNDLES.findIndex((b) => String(b.qty) === params.get('lot')) : -1;
+  // Nettoie les anciennes adresses du type ?couleur=noir-laque (anciens liens, historique, favoris)
+  if (!C.URL_PRESELECT && (params.has('couleur') || params.has('lot'))) {
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.delete('couleur');
+      u.searchParams.delete('lot');
+      window.history.replaceState(null, '', u);
+    } catch (e) { /* file:// */ }
+  }
 
   const state = {
     color: urlColor || COLORS.find((c) => c.id === C.DEFAULT_COLOR) || COLORS[0],
@@ -474,7 +485,7 @@
   function renderColors() {
     $('[data-render="swatches"]').innerHTML = COLORS.map((c) => `
       <label class="swatch" title="${esc(c.name)}">
-        <input type="radio" name="color" value="${esc(c.id)}" ${c === state.color ? 'checked' : ''}>
+        <input type="radio" name="color" value="${esc(c.id)}" autocomplete="off" ${c === state.color ? 'checked' : ''}>
         <span style="${swatchStyle(c)}" ${c.tip ? 'data-tip' : ''}><span class="sr-only">${esc(c.name)}</span></span>
       </label>`).join('');
 
@@ -563,7 +574,7 @@
     const tx = C.TEXTS.product;
     $('[data-render="bundles"]').innerHTML = BUNDLES.map((b, i) => `
       <label class="bundle${i === state.bundle ? ' is-checked' : ''}">
-        <input type="radio" name="bundle" value="${i}" ${i === state.bundle ? 'checked' : ''}>
+        <input type="radio" name="bundle" value="${i}" autocomplete="off" ${i === state.bundle ? 'checked' : ''}>
         <span class="bundle__radio" aria-hidden="true"></span>
         <span class="bundle__main">
           <span class="bundle__title">${esc(b.label)}${b.discount ? ` <span class="bundle__off">-${b.discount} %</span>` : ''}</span>

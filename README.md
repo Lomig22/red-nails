@@ -59,8 +59,9 @@ Dans `COLORS`, chaque couleur a :
   pour créer ses visuels provisoires.
 - **Retirer une couleur** : supprime sa ligne.
 - **Couleur par défaut** : `DEFAULT_COLOR`.
-- **Lien direct pour tes pubs** : `https://red-nails.fr/?couleur=bordeaux&lot=3` ouvre la page
-  avec la couleur et le lot présélectionnés.
+- **Teinte à l'arrivée** : toujours `DEFAULT_COLOR` (Bordeaux), quelle que soit l'adresse.
+  Pour une pub dédiée à une autre teinte, passe `URL_PRESELECT: true` : un lien
+  `https://red-nails.fr/?couleur=rouge-cerise&lot=3` présélectionnera alors teinte et lot.
 - **Kit différent selon la couleur** : par défaut un kit = `PRODUCT.nailsPerKit` ongles en
   `PRODUCT.sizes` tailles. Si une couleur est livrée dans un autre format, ajoute-lui
   `kit: { nailsPerKit: 24, sizes: 12, perSize: 2 }` (c'est le cas du Bleu Nuit). Le titre,
