@@ -11,13 +11,91 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Jost:wght@400..600&display=swap">
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Whop Pixel — code fourni par Whop (non modifié), exécuté UNIQUEMENT après
-       consentement : rn_consent = "granted" (bannière cookies, CNIL). Si la visiteuse
-       refuse ou n'a pas encore choisi, rien n'est chargé. -->
+  <!-- Whop Pixel — code fourni par Whop (2 scripts, non modifiés), exécutés UNIQUEMENT
+       après consentement : rn_consent = "granted" (bannière cookies, CNIL). Si la
+       visiteuse refuse ou n'a pas encore choisi, rien n'est chargé ni mesuré. -->
   <script>
     window.rnLoadWhopPixel = function () {
       if (window.whop) return;
-      !function(w,d,s,u,n,a,b){if(w[n])return;a=w[n]={q:[],t:+new Date,s:[],o:u,track:function(){a.q.push([+new Date].concat([].slice.call(arguments)))},setScope:function(){a.s=[].slice.call(arguments).filter(function(x){return typeof x==="string"});a.q.push([+new Date,"setScope"].concat(a.s))},scope:function(){var c=[].slice.call(arguments);return{track:function(){a.q.push([+new Date].concat([].slice.call(arguments)).concat([{__scope:c}]))}}}};b=d.createElement(s);b.async=1;b.src=u+"/s.js";d.getElementsByTagName(s)[0].parentNode.insertBefore(b,d.getElementsByTagName(s)[0])}(window,document,"script","https://t.whop.tw","whop");whop.setScope("biz_6gHGO6kKyyPSpm");whop.track("page");
+
+      /* ----- Script 1 : code de base Whop ----- */
+      !function(w,d,s,u,n,a,b){if(w[n])return;a=w[n]={q:[],t:+new Date,s:[],o:u,track:function(){a.q.push([+new Date].concat([].slice.call(arguments)))},setScope:function(){a.s=[].slice.call(arguments).filter(function(x){return typeof x==="string"});a.q.push([+new Date,"setScope"].concat(a.s))},scope:function(){var c=[].slice.call(arguments);return{track:function(){a.q.push([+new Date].concat([].slice.call(arguments)).concat([{__scope:c}]))}}}};b=d.createElement(s);b.async=1;b.src=u+"/s.js";d.getElementsByTagName(s)[0].parentNode.insertBefore(b,d.getElementsByTagName(s)[0])}(window,document,"script","https://t.whop.tw","whop");
+      whop.setScope("biz_6gHGO6kKyyPSpm");
+      whop.track("page");
+
+      /* ----- Script 2 : événements d'engagement Whop ----- */
+      (function () {
+        var t = function (name, props) { try { whop.track(name, props || {}); } catch (e) {} };
+        var path = location.pathname;
+
+        // 1. Page importante consultée
+        t("view_content", { page: path, title: document.title });
+
+        // 2. Profondeur de scroll (25 / 50 / 75 / 100 %)
+        var marks = [25, 50, 75, 100], done = {};
+        window.addEventListener("scroll", function () {
+          var h = document.documentElement;
+          var pct = Math.round((h.scrollTop + window.innerHeight) / h.scrollHeight * 100);
+          marks.forEach(function (m) {
+            if (pct >= m && !done[m]) { done[m] = 1; t("scroll_" + m, { page: path }); }
+          });
+        }, { passive: true });
+
+        // 3. Temps passé sur la page (15 s / 60 s / 3 min)
+        [15, 60, 180].forEach(function (s) {
+          setTimeout(function () { t("time_" + s + "s", { page: path }); }, s * 1000);
+        });
+
+        // 4. Clics : téléphone, email, liens externes, réseaux sociaux, boutons
+        document.addEventListener("click", function (e) {
+          var el = e.target.closest("a, button");
+          if (!el) return;
+          var href = el.getAttribute("href") || "";
+          var label = (el.innerText || el.getAttribute("aria-label") || "").trim().slice(0, 60);
+
+          if (href.indexOf("tel:") === 0) {
+            t("contact", { method: "phone", label: label });
+          } else if (href.indexOf("mailto:") === 0) {
+            t("contact", { method: "email", label: label });
+          } else if (/wa\.me|whatsapp/i.test(href)) {
+            t("contact", { method: "whatsapp", label: label });
+          } else if (/instagram|facebook|tiktok|snapchat|youtube/i.test(href)) {
+            t("click_social", { url: href });
+          } else if (/booking|reserv|rdv|calendly|planity|treatwell|doctolib/i.test(href + " " + label)) {
+            t("click_booking", { url: href, label: label });
+          } else if (href.indexOf("http") === 0 && href.indexOf(location.hostname) === -1) {
+            t("click_outbound", { url: href });
+          } else if (el.tagName === "BUTTON" || el.classList.contains("btn") || el.classList.contains("button")) {
+            t("click_button", { label: label, page: path });
+          }
+        });
+
+        // 5. Formulaires : lead avec les infos du visiteur
+        document.addEventListener("submit", function (e) {
+          var f = e.target, data = {};
+          var q = function (sel) { var i = f.querySelector(sel); return i && i.value ? i.value.trim() : undefined; };
+          var email = q('input[type="email"], input[name*="mail" i]');
+          var phone = q('input[type="tel"], input[name*="phone" i], input[name*="tel" i]');
+          var name  = q('input[name*="name" i], input[name*="nom" i]');
+          if (email) data.email = email;
+          if (phone) data.phone = phone;
+          if (name)  data.name = name;
+          data.event_id = "lead_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+          t("lead", data);
+        }, true);
+
+        // 6. Début de remplissage d'un formulaire
+        var started = false;
+        document.addEventListener("focusin", function (e) {
+          if (!started && e.target.closest("form")) { started = true; t("form_start", { page: path }); }
+        });
+
+        // 7. Visiteur qui revient
+        try {
+          if (localStorage.getItem("rn_seen")) t("returning_visitor");
+          else localStorage.setItem("rn_seen", "1");
+        } catch (e) {}
+      })();
     };
     (function () {
       try {
@@ -83,7 +161,7 @@
       <ul>
         <li><strong>Cookies nécessaires</strong> (panier, sécurité, mémorisation de ton choix de cookies) : déposés sans consentement car indispensables au fonctionnement du site.</li>
         <li><strong>Pixel Meta</strong> (Facebook, Instagram) : mesure de l’efficacité de nos publicités et des achats qui en découlent.</li>
-        <li><strong>Pixel Whop</strong> (Whop, Inc., notre plateforme de paiement) : mesure de l’activité des visiteuses sur le site (pages vues, parcours jusqu’au paiement).</li>
+        <li><strong>Pixel Whop</strong> (Whop, Inc., notre plateforme de paiement) : mesure de l’activité des visiteuses sur le site : pages vues, défilement de la page, temps passé, clics sur les boutons et liens, visites répétées (repère enregistré dans ton navigateur), parcours jusqu’au paiement.</li>
         <li>Ces deux outils ne sont chargés <strong>qu’après ton accord</strong> via le bouton « Accepter ». Tu peux refuser sans aucune conséquence sur ta commande, et modifier ton choix à tout moment via le lien « Gérer les cookies » en bas de la page d’accueil.</li>
       </ul>
 

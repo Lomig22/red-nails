@@ -121,7 +121,12 @@
         // Pixel Whop (code officiel dans le <head>), même consentement que Meta
         if (typeof window.rnLoadWhopPixel === 'function') window.rnLoadWhopPixel();
       }
-      else { pixelQueue.length = 0; if (typeof window.fbq === 'function') window.fbq('consent', 'revoke'); }
+      else {
+        pixelQueue.length = 0;
+        if (typeof window.fbq === 'function') window.fbq('consent', 'revoke');
+        // retrait du consentement : on efface le repère "visiteuse qui revient" du pixel Whop
+        try { window.localStorage.removeItem('rn_seen'); } catch (e) { /* ignoré */ }
+      }
     };
     $$('[data-consent-choice]').forEach((b) => b.addEventListener('click', () => answer(b.dataset.consentChoice)));
     $('[data-consent-open]').addEventListener('click', () => { banner.hidden = false; });
