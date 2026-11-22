@@ -764,6 +764,13 @@
       const name = `${t(P.title, colorVars(color))} – ${color.name}`;
       track('AddToCart', { content_ids: [color.variantId], content_name: name, content_type: 'product', quantity: qty, value, currency: C.CURRENCY });
       track('InitiateCheckout', { content_ids: [color.variantId], content_name: name, value, currency: C.CURRENCY, num_items: qty });
+      // Commande en cours, relue par merci.html pour l'événement Achat (valeur réelle)
+      try {
+        window.localStorage.setItem('rn_pending_order', JSON.stringify({
+          id: `${color.id}-${qty}-${Date.now()}`, colorId: color.id, colorName: color.name,
+          variantId: color.variantId, qty, nails: nailsFor(qty, color), value, currency: C.CURRENCY, ts: Date.now(),
+        }));
+      } catch (e) { /* stockage indisponible : l'Achat sera envoyé sans montant */ }
       if (btn) {
         btn.setAttribute('aria-busy', 'true');
         const label = $('.btn__label', btn) || btn;

@@ -140,6 +140,15 @@ Pour changer un prix ou un lien : modifie le plan dans Whop **et** le prix dans 
 affiche ses propres prix). Le panier et l'icône panier sont masqués dans ce mode
 (`CHECKOUT_MODE: 'cart'` pour les retrouver).
 
+### Événement Achat (page merci.html)
+
+Le paiement se fait sur Whop : l'Achat Meta est envoyé par **merci.html**, la page de confirmation.
+- Juste avant d'envoyer la cliente sur Whop, le site enregistre la commande (teinte, lot, montant).
+- Sur merci.html, l'événement `Purchase` part **une seule fois** avec le vrai montant, et seulement
+  si la cliente a accepté les cookies. Sans commande enregistrée (page ouverte directement), rien n'est envoyé.
+- **À régler dans Whop** : l'URL de redirection après paiement de chaque plan →
+  `https://red-nails.fr/merci.html` (ou l'adresse où le site est en ligne).
+
 ### Paiement / panier
 
 - `CHECKOUT_URL` : destination du bouton « Passer commande ».

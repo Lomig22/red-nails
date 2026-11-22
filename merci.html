@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Merci pour ta commande | RED NAILS</title>
+  <!-- Page de confirmation : vers laquelle Whop redirige après le paiement.
+       Envoie l'événement Meta "Purchase" (après consentement cookies). -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Jost:wght@400..600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script>
+  <script src="merci.js" defer></script>
+</head>
+<body class="thanks-page">
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="logo" href="index.html"><span class="logo__red">RED</span> NAILS</a>
+    </div>
+  </header>
+
+  <main class="section thanks">
+    <div class="container container--narrow">
+      <p class="eyebrow eyebrow--center">Commande confirmée</p>
+      <h1 class="h2 thanks__title">Merci <em>pour ta commande</em></h1>
+      <p class="lead thanks__lead">Ton paiement est validé. Tu vas recevoir un e-mail de confirmation avec le récapitulatif de ta commande.</p>
+
+      <div class="thanks__recap" data-recap hidden>
+        <p class="thanks__recap-title">Ta commande</p>
+        <p class="thanks__recap-line" data-recap-line></p>
+      </div>
+
+      <ol class="thanks__steps">
+        <li><strong>Préparation</strong><span>Commande passée avant 14 h un jour ouvré : expédiée le jour même.</span></li>
+        <li><strong>Expédition</strong><span>Tu reçois ton numéro de suivi par e-mail.</span></li>
+        <li><strong>Livraison</strong><span>2 à 4 jours ouvrés après l’expédition.</span></li>
+      </ol>
+
+      <p class="thanks__help">Une question ? Écris-nous à <a href="mailto:contact@red-nails.fr">contact@red-nails.fr</a>.</p>
+      <a class="btn btn--primary thanks__back" href="index.html">Retour à la boutique</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="logo logo--light"><span class="logo__red">RED</span> NAILS</p>
+      <nav aria-label="Informations légales">
+        <ul class="footer__links">
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+          <li><a href="cgv.html">CGV</a></li>
+          <li><a href="confidentialite.html">Politique de confidentialité</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <button class="link-btn footer__cookies" type="button" data-consent-open>Gérer les cookies</button>
+    </div>
+  </footer>
+
+  <!-- Bannière cookies : le pixel Meta ne se charge qu'après "Accepter" -->
+  <div class="consent" role="region" aria-label="Cookies" data-consent hidden>
+    <p class="consent__text"><span data-consent-text></span> <a href="confidentialite.html">En savoir plus</a></p>
+    <div class="consent__actions">
+      <button class="btn btn--ghost" type="button" data-consent-choice="denied">Refuser</button>
+      <button class="btn btn--ghost" type="button" data-consent-choice="granted">Accepter</button>
+    </div>
+  </div>
+</body>
+</html>
