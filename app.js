@@ -749,12 +749,31 @@
   }
   window.addToCart = addToCart;
 
+  /** Lien de paiement Whop de la teinte + du lot (config : color.checkout[nbKits]). */
+  const directCheckoutUrl = (color, qty) => (C.CHECKOUT_MODE === 'direct' && color.checkout && color.checkout[qty]) || null;
+
   /**
-   * Achat direct (cartes teintes) : ajoute le lot choisi puis envoie au paiement.
-   * Mode démo : la page de paiement n'existe pas encore, on ouvre le panier à la place.
-   * Shopify : addToCart (fetch /cart/add.js) puis redirection vers /checkout.
+   * Achat direct : envoie au paiement de la teinte + du lot choisis.
+   * - Mode 'direct' (Whop) : événements Meta AddToCart + InitiateCheckout, puis redirection.
+   * - Mode 'cart' : ajoute au panier puis /checkout (ou ouvre le panier en démo).
    */
-  function buyNow(color, qty) {
+  function buyNow(color, qty, btn) {
+    const url = directCheckoutUrl(color, qty);
+    if (url) {
+      const value = priceForKits(qty);
+      const name = `${t(P.title, colorVars(color))} – ${color.name}`;
+      track('AddToCart', { content_ids: [color.variantId], content_name: name, content_type: 'product', quantity: qty, value, currency: C.CURRENCY });
+      track('InitiateCheckout', { content_ids: [color.variantId], content_name: name, value, currency: C.CURRENCY, num_items: qty });
+      if (btn) {
+        btn.setAttribute('aria-busy', 'true');
+        const label = $('.btn__label', btn) || btn;
+        label.textContent = C.TEXTS.product.redirecting;
+      }
+      live(C.TEXTS.product.redirecting);
+      // petit délai pour laisser partir les événements du pixel avant de quitter la page
+      setTimeout(() => { window.location.href = url; }, pixelLoaded ? 350 : 0);
+      return;
+    }
     addToCart(color.variantId, qty, { openCart: false }).then(() => {
       track('InitiateCheckout', { value: state.cart.reduce((s, l) => s + priceForKits(l.kits), 0), currency: C.CURRENCY, num_items: totalKits() });
       if (C.DEMO_MODE) { openDialog(cartEl()); updateShadeButtons(); return; }
@@ -825,8 +844,11 @@
     $('[data-open-cart]').addEventListener('click', () => openDialog(cartEl()));
     $$('[data-add-current]').forEach((btn) => btn.addEventListener('click', () => {
       btn.classList.remove('is-added'); void btn.offsetWidth; btn.classList.add('is-added');
-      addToCart(state.color.variantId, currentBundle().qty);
+      if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, btn);
+      else addToCart(state.color.variantId, currentBundle().qty);
     }));
+    // Paiement direct : pas de panier, l'icône panier n'a plus d'utilité
+    if (C.CHECKOUT_MODE === 'direct') $('[data-open-cart]').hidden = true;
     $('[data-cart-body]').addEventListener('click', (e) => {
       const q = e.target.closest('[data-qty]');
       const r = e.target.closest('[data-remove]');
@@ -1063,7 +1085,19 @@
     initReveal();
     initConsent();
     initGlow();
-    $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', goToOffers));
+    // "J'en profite" : paiement direct de la teinte + du lot sélectionnés (sinon : remonte aux lots)
+    $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', () => {
+      if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, b);
+      else goToOffers();
+    }));
+    // Retour depuis la page de paiement (bouton "précédent") : on remet les boutons en état
+    window.addEventListener('pageshow', (e) => {
+      if (!e.persisted) return;
+      $$('[aria-busy]').forEach((b) => b.removeAttribute('aria-busy'));
+      renderTexts();
+      $$('[data-cta-offers]').forEach((b) => { b.textContent = t(C.TEXTS.cta); });
+      updateShadeButtons();
+    });
     track('ViewContent', { content_ids: [state.color.variantId], content_name: t(P.title), content_type: 'product', value: UNIT, currency: C.CURRENCY });
   }
 

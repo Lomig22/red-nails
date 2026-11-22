@@ -126,6 +126,20 @@ de la galerie (même chemin que la 1re photo de la couleur) : c'est ce qui rend 
   installé, colle le widget dans `#reviews-widget` (voir le commentaire dans `index.html`) puis passe
   `REVIEWS.visible` à `true`.
 
+### Paiement Whop (mode actuel)
+
+`CHECKOUT_MODE: 'direct'` : chaque bouton d'achat (« Commander », barre collante, « J'en profite »,
+cartes teintes) envoie directement vers le lien Whop de la **teinte + du lot** sélectionnés.
+Les liens sont dans `config.js`, champ `checkout` de chaque couleur :
+
+```js
+checkout: { 1: 'https://whop.com/checkout/plan_…', 2: '…', 3: '…' },
+```
+
+Pour changer un prix ou un lien : modifie le plan dans Whop **et** le prix dans `BUNDLES` (le site
+affiche ses propres prix). Le panier et l'icône panier sont masqués dans ce mode
+(`CHECKOUT_MODE: 'cart'` pour les retrouver).
+
 ### Paiement / panier
 
 - `CHECKOUT_URL` : destination du bouton « Passer commande ».

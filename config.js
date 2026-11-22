@@ -58,10 +58,14 @@ window.RN_CONFIG = {
   CURRENCY: 'EUR',
 
   CHECKOUT_URL: CHECKOUT_URL,
+  // 'direct' : chaque bouton d'achat envoie directement vers le lien de paiement
+  // Whop de la teinte + du lot choisis (champ "checkout" de chaque couleur).
+  // 'cart' : ancien tiroir panier (démo / Shopify).
+  CHECKOUT_MODE: 'direct',
   // Optionnel : lien panier Shopify "permalink" (https://red-nails.fr/cart).
   CART_PERMALINK_BASE: null,
   // true = affiche une mention "mode démo" dans le tiroir panier.
-  DEMO_MODE: true,
+  DEMO_MODE: false,
 
   PRIX_REFERENCE: PRIX_REFERENCE,
 
@@ -147,6 +151,8 @@ window.RN_CONFIG = {
   COLORS: [
     {
       id: 'bordeaux', name: 'Bordeaux', hex: '#6E0F1C', variantId: 'VARIANT_BORDEAUX',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_w7AeKgI8selsO', 2: 'https://whop.com/checkout/plan_XrxfXolHqTgFw', 3: 'https://whop.com/checkout/plan_C1kYOZiQsHTtc' },
       desc: 'Profond et élégant, du bureau au dîner.',
       images: [
         { src: 'images/bordeaux/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
@@ -160,6 +166,8 @@ window.RN_CONFIG = {
     },
     {
       id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_TLMgs7ifrt6tH', 2: 'https://whop.com/checkout/plan_uBSNP1qPLf0W4', 3: 'https://whop.com/checkout/plan_HfY8Ph7pd4rKa' },
       desc: 'Le rouge signature, brillant comme un vernis laqué.',
       images: [
         { src: 'images/rouge-cerise/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur une main' },
@@ -171,6 +179,8 @@ window.RN_CONFIG = {
     },
     {
       id: 'bleu-nuit', name: 'Bleu Nuit', hex: '#1B2A5E', variantId: 'VARIANT_BLEU_NUIT',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_pLz48nlucjL5p', 2: 'https://whop.com/checkout/plan_NZKj1fHnDAHJN', 3: 'https://whop.com/checkout/plan_nCFzSbpwyOsgf' },
       desc: 'Un marine profond, chic et inattendu.',
       images: [
         { src: 'images/bleu-nuit/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur une main' },
@@ -185,6 +195,8 @@ window.RN_CONFIG = {
     },
     {
       id: 'rose-bonbon', name: 'Rose Bonbon', hex: '#D81B60', variantId: 'VARIANT_ROSE_BONBON',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_ZGT3Ll4AYLb4l', 2: 'https://whop.com/checkout/plan_KeM2oCuvhuzn1', 3: 'https://whop.com/checkout/plan_oGPS7QbLCNarD' },
       desc: 'Un rose framboise, joyeux et lumineux.',
       images: [
         { src: 'images/rose-bonbon/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
@@ -197,6 +209,8 @@ window.RN_CONFIG = {
     },
     {
       id: 'nude-rose', name: 'Nude Rosé', hex: '#EAC7C3', variantId: 'VARIANT_NUDE_ROSE',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_In8yb9hD9X9V6', 2: 'https://whop.com/checkout/plan_tXPZolv6fAaMa', 3: 'https://whop.com/checkout/plan_Pih5WXR3t2r4m' },
       desc: 'L’effet ongles parfaits, rosé et laiteux.',
       images: [
         { src: 'images/nude-rose/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
@@ -210,6 +224,8 @@ window.RN_CONFIG = {
     },
     {
       id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_7Mz64YN5DUAmm', 2: 'https://whop.com/checkout/plan_T8rfjUQXshyvU', 3: 'https://whop.com/checkout/plan_P0kYdXtQcXQTX' },
       desc: 'Un noir miroir, intense et graphique.',
       images: [
         { src: 'images/noir-laque/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur une main' },
@@ -222,6 +238,8 @@ window.RN_CONFIG = {
     },
     {
       id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC',
+      // Liens de paiement Whop : nombre de kits -> checkout
+      checkout: { 1: 'https://whop.com/checkout/plan_H5mITBjh8MdR4', 2: 'https://whop.com/checkout/plan_seVIrEiUZhFkD', 3: 'https://whop.com/checkout/plan_dYoCTtXmEuP8H' },
       desc: 'La French intemporelle, bout blanc net.',
       images: [
         { src: 'images/french-blanc/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande, base rosée et bout blanc' },
@@ -320,8 +338,9 @@ window.RN_CONFIG = {
       freeShipping: 'Livraison offerte',
       shippingPaid: 'Livraison suivie {shipping} · offerte dès {freeFrom} kits',
       shippingFree: 'Livraison suivie offerte',
-      addToCart: 'Ajouter au panier',
-      stickyAdd: 'Ajouter',
+      addToCart: 'Commander',
+      stickyAdd: 'Commander',
+      redirecting: 'Paiement sécurisé…',
       prev: 'Photo précédente',
       next: 'Photo suivante',
     },
