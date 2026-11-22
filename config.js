@@ -66,9 +66,11 @@ window.RN_CONFIG = {
 
   /* ---------- Produit ---------- */
   PRODUCT: {
-    title: 'Kit 30 faux ongles en gel souple',
+    title: 'Kit {nails} faux ongles en gel souple', // {nails} suit la couleur choisie
     kicker: 'Gel souple · Forme amande · Effet laqué',
     price: PRIX_UNITAIRE,
+    // Valeurs par défaut du kit. Une couleur peut avoir un kit différent :
+    // voir "kit: { … }" dans COLORS (ex. Bleu Nuit).
     nailsPerKit: 30,
     sizes: 15,
     perSize: 2,
@@ -152,14 +154,17 @@ window.RN_CONFIG = {
     },
     {
       id: 'bleu-nuit', name: 'Bleu Nuit', hex: '#1B2A5E', variantId: 'VARIANT_BLEU_NUIT', desc: 'Un bleu marine profond, chic et inattendu.',
+      // Kit différent du kit par défaut : 24 ongles, 12 tailles (2 de chaque).
+      // Le titre, le prix par ongle, les lots, le contenu du kit et la FAQ s'adaptent.
+      kit: { nailsPerKit: 24, sizes: 12, perSize: 2 },
       images: [
         { src: 'images/bleu-nuit/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} en forme amande posés sur une main' },
         { src: 'images/bleu-nuit/main-2.webp', label: 'Brillance', alt: 'Gros plan sur les faux ongles {color} et leur reflet laqué' },
         { src: 'images/bleu-nuit/main-3.webp', label: 'Sur la main', alt: 'Mains aux faux ongles {color} en forme amande' },
         { src: 'images/bleu-nuit/main-4.webp', label: 'Sur la main', alt: 'Faux ongles {color} posés sur deux mains' },
         { src: 'images/bleu-nuit/finition.webp', label: 'Finition', alt: 'Faux ongles {color} en gel souple, finition brillante' },
-        // Infographie commune à toutes les couleurs (tailles, lime, pastilles)
-        { src: 'images/bordeaux/contenu-kit.webp', label: 'Contenu du kit', alt: 'Contenu du kit : 15 tailles d’ongles avec leurs dimensions, lime à ongles et pastilles adhésives' },
+        { src: 'images/bleu-nuit/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
+        { src: 'images/bleu-nuit/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes : limer, nettoyer, coller l’adhésif, choisir la taille, appuyer, c’est terminé' },
       ],
       thumbImage: 0,
       kitImage: 5,
@@ -298,7 +303,7 @@ window.RN_CONFIG = {
       eyebrow: 'Tout est inclus',
       title: 'Ce que contient ton kit',
       items: [
-        '30 faux ongles en gel souple, forme amande',
+        '{nails} faux ongles en gel souple, forme amande',
         '{sizes} tailles, {perSize} ongles de chaque',
         '1 planche de pastilles adhésives',
         '1 lime à ongles',

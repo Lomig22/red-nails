@@ -61,6 +61,11 @@ Dans `COLORS`, chaque couleur a :
 - **Couleur par défaut** : `DEFAULT_COLOR`.
 - **Lien direct pour tes pubs** : `https://red-nails.fr/?couleur=bordeaux&lot=3` ouvre la page
   avec la couleur et le lot présélectionnés.
+- **Kit différent selon la couleur** : par défaut un kit = `PRODUCT.nailsPerKit` ongles en
+  `PRODUCT.sizes` tailles. Si une couleur est livrée dans un autre format, ajoute-lui
+  `kit: { nailsPerKit: 24, sizes: 12, perSize: 2 }` (c'est le cas du Bleu Nuit). Le titre,
+  le prix par ongle, les cartes de lots, le contenu du kit, la FAQ et le panier s'adaptent
+  automatiquement quand cette couleur est sélectionnée.
 
 ### Délais de livraison
 

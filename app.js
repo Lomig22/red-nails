@@ -53,9 +53,16 @@
 
   const P = C.PRODUCT;
   const UNIT = P.price;
-  const nailsFor = (kits) => kits * P.nailsPerKit;
+  /** Couleur sélectionnée (state est défini plus bas, appelé seulement après). */
+  function activeColor() { return state.color; }
+  /**
+   * Caractéristiques du kit d'une couleur : PRODUCT par défaut, surchargé par
+   * color.kit dans config.js (ex. Bleu Nuit = 24 ongles, 12 tailles).
+   */
+  const specOf = (color) => Object.assign({ nailsPerKit: P.nailsPerKit, sizes: P.sizes, perSize: P.perSize }, color && color.kit);
+  const nailsFor = (kits, color = activeColor()) => kits * specOf(color).nailsPerKit;
   /** Prix par ongle arrondi au centime : 24,99 / 30 = 0,83 € */
-  const perNail = (price, kits) => round2(price / nailsFor(kits));
+  const perNail = (price, kits, color = activeColor()) => round2(price / nailsFor(kits, color));
 
   /** Lots enrichis : prix barré = quantité × prix unitaire pratiqué. */
   const BUNDLES = C.BUNDLES.map((b) => {
@@ -69,11 +76,10 @@
     return Object.assign({}, b, {
       compareAt,
       discount,
-      perNail: perNail(b.price, b.qty),
       freeShipping: b.qty >= C.SHIPPING.freeFromKits,
     });
   });
-  const BEST_BUNDLE = BUNDLES.reduce((best, b, i) => (b.perNail < BUNDLES[best].perNail ? i : best), 0);
+  const BEST_BUNDLE = BUNDLES.reduce((best, b, i) => (b.price / b.qty < BUNDLES[best].price / BUNDLES[best].qty ? i : best), 0);
 
   /** Prix d'un nombre de kits quelconque : on applique les lots les plus gros d'abord. */
   function priceForKits(kits) {
@@ -89,11 +95,8 @@
   /** Variables disponibles dans tous les textes de config.js : {perNail}, {cutoff}… */
   const VARS = {
     price: money(UNIT),
-    perNail: money(perNail(UNIT, 1)),
-    minPerNail: money(BUNDLES[BEST_BUNDLE].perNail),
-    nails: P.nailsPerKit,
-    sizes: P.sizes,
-    perSize: P.perSize,
+    // meilleur prix à l'ongle, toutes couleurs confondues ("dès 0,58 € l'ongle")
+    minPerNail: money(Math.min(...C.COLORS.map((c) => perNail(BUNDLES[BEST_BUNDLE].price, BUNDLES[BEST_BUNDLE].qty, c)))),
     salonPrice: money(C.COMPARISON.salonPrice),
     posePrice: money(round2(UNIT / P.posesPerKit)),
     shipping: money(C.SHIPPING.price),
@@ -105,9 +108,14 @@
     colorCount: C.COLORS.length,
     year: new Date().getFullYear(),
   };
+  /** Variables qui dépendent de la couleur : {nails}, {sizes}, {perSize}, {perNail} */
+  function colorVars(color = activeColor()) {
+    const k = specOf(color);
+    return { nails: k.nailsPerKit, sizes: k.sizes, perSize: k.perSize, perNail: money(perNail(UNIT, 1, color)) };
+  }
   /** Remplace les {variables} d'un texte. */
   const t = (str, extra) => String(str == null ? '' : str).replace(/\{(\w+)\}/g, (m, k) => {
-    const all = Object.assign({}, VARS, extra);
+    const all = Object.assign({}, VARS, colorVars(), extra);
     return k in all ? all[k] : m;
   });
 
@@ -191,20 +199,20 @@
     $('[data-render="announce-sr"]').textContent = C.TEXTS.announce.map((x) => t(x)).join(' · ');
   }
 
-  function renderStatic() {
-    $('[data-render="promises"]').innerHTML = P.promises
-      .map((p) => `<li>${icon(p.icon, 16)}<span>${esc(t(p.text))}</span></li>`).join('');
-
-    $('[data-render="reassurance"]').innerHTML = C.TEXTS.reassurance
-      .map((r) => `<li>${icon(r.icon, 24, 1.8)}<strong>${esc(t(r.title))}</strong><span>${esc(t(r.text))}</span></li>`).join('');
-
-    // Ligne "institut" : on met le prix par ongle en valeur
+  /**
+   * Textes qui changent avec la couleur (nb d'ongles, tailles, prix par ongle) :
+   * titre, ligne "institut", étapes, contenu du kit, FAQ.
+   */
+  function renderColorTexts() {
+    renderTexts();
+    const pn = esc(colorVars().perNail);
     const salon = $('[data-salon-line]');
     salon.innerHTML = icon('scissors', 18) + '<span>' +
-      esc(t(C.TEXTS.product.salonLine)).replace(esc(VARS.perNail), `<strong>${esc(VARS.perNail)}</strong>`) + '</span>';
-    const compareLine = $('.compare__line');
-    compareLine.innerHTML = esc(t(C.TEXTS.compare.line)).replace(esc(VARS.perNail), `<strong>${esc(VARS.perNail)}</strong>`);
+      esc(t(C.TEXTS.product.salonLine)).replace(pn, `<strong>${pn}</strong>`) + '</span>';
+    $('.compare__line').innerHTML = esc(t(C.TEXTS.compare.line)).replace(pn, `<strong>${pn}</strong>`);
 
+    // on garde ouvertes les questions de la FAQ déjà ouvertes
+    const open = $$('[data-render="faq"] details').map((d) => d.open);
     $('[data-render="steps"]').innerHTML = C.TEXTS.steps.items.map((s, i) => `
       <li class="step">
         <span class="step__num" aria-hidden="true">${i + 1}</span>
@@ -220,6 +228,17 @@
         <summary>${esc(t(f.q))}</summary>
         <div class="faq__answer"><p>${esc(t(f.a))}</p></div>
       </details>`).join('');
+    $$('[data-render="faq"] details').forEach((d, i) => { if (open[i]) d.open = true; });
+  }
+
+  function renderStatic() {
+    $('[data-render="promises"]').innerHTML = P.promises
+      .map((p) => `<li>${icon(p.icon, 16)}<span>${esc(t(p.text))}</span></li>`).join('');
+
+    $('[data-render="reassurance"]').innerHTML = C.TEXTS.reassurance
+      .map((r) => `<li>${icon(r.icon, 24, 1.8)}<strong>${esc(t(r.title))}</strong><span>${esc(t(r.text))}</span></li>`).join('');
+
+    renderColorTexts();
 
     $('[data-render="footer-links"]').innerHTML = C.TEXTS.footer.links
       .map((l) => `<li><a href="${esc(l.href)}">${esc(l.label)}</a></li>`).join('');
@@ -309,6 +328,12 @@
       if (this.vp) this.vp.parentElement.classList.toggle('is-first', i === 0);
       $$('.thumb').forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
       $('[data-gallery-count]').textContent = `${i + 1} / ${this.count}`;
+      // La miniature active reste visible dans la rangée (sans faire défiler la page)
+      const row = $('[data-render="thumbs"]');
+      const th = $$('.thumb')[i];
+      if (row && th && row.scrollWidth > row.clientWidth) {
+        row.scrollTo({ left: th.offsetLeft - row.offsetLeft - (row.clientWidth - th.offsetWidth) / 2, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+      }
     },
 
     currentImg() { return $$('.gallery__slide img', this.vp)[state.slide]; },
@@ -454,6 +479,14 @@
     kitImg.src = imageSrc(color, kitIndex(color));
     kitImg.alt = imageAlt(color, kitIndex(color));
 
+    if (changed) {
+      // nb d'ongles / tailles / prix par ongle propres à la couleur
+      renderColorTexts();
+      renderBundles();
+      updatePrice(false);
+      if (compareDone) $('[data-counter]').textContent = moneyFull(perNail(UNIT, 1));
+    }
+
     if (changed && !opts.silent) {
       gallery.swap(color);
       live(`Couleur sélectionnée : ${color.name}`);
@@ -478,7 +511,7 @@
         <span class="bundle__radio" aria-hidden="true"></span>
         <span class="bundle__main">
           <span class="bundle__title">${esc(b.label)} ${b.discount ? `<span class="badge">-${b.discount} %</span>` : ''}</span>
-          <span class="bundle__sub">${esc(t(tx.nailsCount, { count: nailsFor(b.qty) }))} · <strong>${esc(t(tx.perNailShort, { value: money(b.perNail) }))}</strong></span>
+          <span class="bundle__sub">${esc(t(tx.nailsCount, { count: nailsFor(b.qty) }))} · <strong>${esc(t(tx.perNailShort, { value: money(perNail(b.price, b.qty)) }))}</strong></span>
           ${b.freeShipping ? `<span class="bundle__ship">${icon('truck', 15)}${esc(tx.freeShipping)}</span>` : ''}
         </span>
         <span class="bundle__price">
@@ -487,7 +520,10 @@
         </span>
         ${b.highlight ? `<span class="bundle__flag">${esc(b.highlight)}</span>` : ''}
       </label>`).join('');
+  }
 
+  function initBundles() {
+    renderBundles();
     $('[data-render="bundles"]').addEventListener('change', (e) => {
       if (e.target.name !== 'bundle') return;
       state.bundleTouched = true;
@@ -516,7 +552,7 @@
       badge.hidden = true;
     }
     const pn = $('[data-per-nail]');
-    pn.textContent = money(b.perNail);
+    pn.textContent = money(perNail(b.price, b.qty));
     if (animate && !reducedMotion.matches) { pn.classList.remove('is-pop'); void pn.offsetWidth; pn.classList.add('is-pop'); }
 
     const ship = $('[data-ship-line]');
@@ -638,7 +674,7 @@
     const line = state.cart.find((l) => l.variantId === variantId);
     if (line) line.kits += qty; else state.cart.push({ variantId, colorId: color.id, kits: qty });
 
-    track('AddToCart', { content_ids: [variantId], content_name: `${P.title} – ${color.name}`, content_type: 'product', quantity: qty, value: priceForKits(qty), currency: C.CURRENCY });
+    track('AddToCart', { content_ids: [variantId], content_name: `${t(P.title, colorVars(color))} – ${color.name}`, content_type: 'product', quantity: qty, value: priceForKits(qty), currency: C.CURRENCY });
     renderCart();
     bumpCount();
     live(`${C.TEXTS.cart.added} : ${qty} kit(s) ${color.name}`);
@@ -686,8 +722,8 @@
         <div class="line">
           <img src="${esc(imageSrc(c, thumbIndex(c)))}" alt="" width="72" height="72">
           <div>
-            <p class="line__title">${esc(P.title)} – ${esc(c.name)}</p>
-            <p class="line__meta">${esc(t(tx.kitsLabel, { count: l.kits, nails: nailsFor(l.kits) }))}</p>
+            <p class="line__title">${esc(t(P.title, colorVars(c)))} – ${esc(c.name)}</p>
+            <p class="line__meta">${esc(t(tx.kitsLabel, { count: l.kits, nails: nailsFor(l.kits, c) }))}</p>
             <div class="qty" role="group" aria-label="Quantité ${esc(c.name)}">
               <button type="button" data-qty="${idx}" data-delta="-1" aria-label="Retirer un kit">−</button>
               <span>${l.kits}</span>
@@ -772,7 +808,7 @@
     const name = $('[data-sticky-name]');
     if (!name) return;
     name.textContent = `${state.color.name} · ${b.label}`;
-    $('[data-sticky-price]').innerHTML = `${money(b.price)} <small>${esc(t(C.TEXTS.product.perNailShort, { value: money(b.perNail) }))}</small>`;
+    $('[data-sticky-price]').innerHTML = `${money(b.price)} <small>${esc(t(C.TEXTS.product.perNailShort, { value: money(perNail(b.price, b.qty)) }))}</small>`;
   }
 
   function initSticky() {
@@ -842,10 +878,10 @@
   /* ======================================================================
      11. COMPARAISON ANIMÉE & APPARITIONS AU DÉFILEMENT
      ====================================================================== */
+  let compareDone = false;
   function initCompare() {
     const counter = $('[data-counter]');
     const from = C.COMPARISON.salonPrice;
-    const to = perNail(UNIT, 1);
     const pose = round2(UNIT / P.posesPerKit);
     $('[data-bar-val="salon"]').textContent = money(from) + '+';
     $('[data-bar-val="ours"]').textContent = money(pose);
@@ -855,7 +891,7 @@
     };
 
     if (reducedMotion.matches || !('IntersectionObserver' in window)) {
-      counter.textContent = moneyFull(to); setBars(); return;
+      compareDone = true; counter.textContent = moneyFull(perNail(UNIT, 1)); setBars(); return;
     }
     counter.textContent = moneyFull(from);
     const io = new IntersectionObserver(([entry]) => {
@@ -866,8 +902,9 @@
       const ease = (x) => 1 - Math.pow(1 - x, 4);
       const step = (now) => {
         const p = Math.min(1, (now - start) / dur);
+        const to = perNail(UNIT, 1);
         counter.textContent = moneyFull(round2(from + (to - from) * ease(p)));
-        if (p < 1) requestAnimationFrame(step);
+        if (p < 1) requestAnimationFrame(step); else compareDone = true;
       };
       requestAnimationFrame(step);
     }, { threshold: 0.45 });
@@ -897,7 +934,7 @@
     renderStatic();
     gallery.init();
     renderColors();
-    renderBundles();
+    initBundles();
     setColor(state.color.id, { silent: true });
     updatePrice(false);
     initDelivery();
@@ -910,7 +947,7 @@
 
     $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', goToOffers));
 
-    track('ViewContent', { content_ids: [state.color.variantId], content_name: P.title, content_type: 'product', value: UNIT, currency: C.CURRENCY });
+    track('ViewContent', { content_ids: [state.color.variantId], content_name: t(P.title), content_type: 'product', value: UNIT, currency: C.CURRENCY });
   }
 
   // Exposé pour les tests / le débogage dans la console
