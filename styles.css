@@ -762,3 +762,34 @@ dialog::backdrop { background: rgba(23, 16, 15, .5); backdrop-filter: blur(3px);
 .btn--glow::after { left: 0; width: 45%; transform: translateX(-130%) skewX(-18deg); animation-name: glintX; will-change: transform; }
 @keyframes glintX { 0% { transform: translateX(-130%) skewX(-18deg); } 55%, 100% { transform: translateX(260%) skewX(-18deg); } }
 .js .btn--glow:not(.is-live), .js .btn--glow:not(.is-live)::after { animation-play-state: paused; }
+
+/* ---------- Boutons "Choisir cette teinte" : vrais boutons, bien visibles ---------- */
+.shade__body { grid-template-rows: auto 1fr auto; }
+.shade__pill {
+  position: relative; overflow: hidden; isolation: isolate;
+  justify-self: stretch; display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; margin-top: 12px; padding: 10px 12px;
+  background: var(--red); color: #fff; border: 0; border-radius: var(--r);
+  font-family: var(--sans); font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; line-height: 1.25; text-align: center;
+  box-shadow: 0 10px 22px -14px rgba(200, 16, 46, .9);
+  transition: background .25s, transform .25s var(--ease), box-shadow .25s;
+}
+.shade__pill::after { content: '→'; font-size: .95rem; letter-spacing: 0; transition: transform .3s var(--ease); }
+.shade__pill::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; z-index: -1; pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .5), transparent);
+  transform: translateX(-130%) skewX(-18deg);
+}
+.shade:hover .shade__pill, .shade:focus-visible .shade__pill { background: var(--red-deep); transform: translateY(-2px); box-shadow: 0 16px 28px -14px rgba(200, 16, 46, .95); }
+.shade:hover .shade__pill::after { transform: translateX(4px); }
+.shade:hover .shade__pill::before { transition: transform .8s var(--ease); transform: translateX(260%) skewX(-18deg); }
+.shade:active .shade__pill { transform: scale(.98); }
+/* Reflet automatique de temps en temps sur les cartes visibles */
+.js .shade-grid.is-live .shade:not([aria-pressed="true"]) .shade__pill::before { animation: glintX 4.2s var(--ease) infinite; }
+.shade-grid.is-live li:nth-child(2n) .shade__pill::before { animation-delay: .7s; }
+.shade-grid.is-live li:nth-child(3n) .shade__pill::before { animation-delay: 1.4s; }
+/* Teinte déjà choisie */
+.shade[aria-pressed="true"] .shade__pill { background: var(--ink); color: #fff; border: 0; box-shadow: none; }
+.shade[aria-pressed="true"] .shade__pill::after { content: none; }
+@media (max-width: 379px) { .shade__pill { font-size: .64rem; letter-spacing: .06em; padding: 8px; } }
+@media (prefers-reduced-motion: reduce) { .shade__pill::before { display: none; } }

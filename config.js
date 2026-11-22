@@ -286,7 +286,10 @@ window.RN_CONFIG = {
   /* ---------- Pop-up promo ---------- */
   POPUP: {
     enabled: true,
-    delaySeconds: 12,
+    delaySeconds: 12,        // 1re apparition
+    repeatEveryMinutes: 2,   // réapparaît toutes les 2 min après fermeture (0 = une seule fois)
+    maxPerSession: 5,        // au maximum 5 fois par visite
+    // Le pop-up ne revient plus dès que la visiteuse a copié le code.
     exitIntent: true,
     eyebrow: 'Bienvenue chez RED NAILS',
     title: '-10 %',
@@ -376,8 +379,8 @@ window.RN_CONFIG = {
       title: 'Trouve ta',
       titleAccent: 'teinte',
       intro: 'Touche une teinte : elle s’affiche directement dans ta fiche produit.',
-      choose: 'Choisir',
-      selected: 'Sélectionnée',
+      choose: 'Choisir cette teinte',
+      selected: 'Teinte choisie ✓',
       soon: 'Photos à venir',
     },
 

@@ -118,7 +118,9 @@ de la galerie (même chemin que la 1re photo de la couleur) : c'est ce qui rend 
 - Tous les textes : `TEXTS` (bandeau défilant, étapes, contenu du kit, FAQ, footer, panier…).
   Les mots entre `{accolades}` sont remplacés automatiquement (liste en tête de `config.js`).
 - Pop-up : `POPUP` (délai, code promo, textes, `enabled: false` pour la couper).
-  Elle s'affiche une seule fois par session. Le code `BIENVENUE10` doit exister dans Shopify
+  Elle s'affiche après 12 s (ou à l'intention de sortie sur ordinateur), puis revient toutes les
+  `repeatEveryMinutes` (2 min) après fermeture, au maximum `maxPerSession` fois (5) par visite.
+  Elle ne revient plus dès que la visiteuse a copié le code. Le code `BIENVENUE10` doit exister dans Shopify
   (Remises → Code de réduction).
 - Avis clients : la section existe mais reste **cachée et vide**. Une fois Judge.me ou Loox
   installé, colle le widget dans `#reviews-widget` (voir le commentaire dans `index.html`) puis passe

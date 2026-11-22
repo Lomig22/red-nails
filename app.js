@@ -859,11 +859,20 @@
   /* ======================================================================
      11. POP-UP PROMO — 12 s ou intention de sortie, 1 fois par session
      ====================================================================== */
+  /**
+   * Pop-up code promo : 1re apparition après delaySeconds (ou intention de sortie
+   * sur ordinateur), puis de nouveau toutes les repeatEveryMinutes, au maximum
+   * maxPerSession fois par visite. Ne revient plus une fois le code copié.
+   * Compteurs gardés en sessionStorage (survivent à un rechargement de page).
+   */
   function initPopup() {
     const cfg = C.POPUP;
     const dlg = $('#promo');
-    const KEY = 'rn_popup_seen';
-    let shown = false;
+    const K_COUNT = 'rn_popup_count', K_LAST = 'rn_popup_last', K_DONE = 'rn_popup_done';
+    const count = () => parseInt(session.get(K_COUNT) || '0', 10) || 0;
+    const repeatMs = (cfg.repeatEveryMinutes || 0) * 60000;
+    const max = cfg.maxPerSession || 1;
+    let timer;
 
     $('[data-copy-code]').addEventListener('click', async (e) => {
       const label = $('span', e.currentTarget);
@@ -877,24 +886,41 @@
       label.textContent = cfg.copiedLabel;
       live(cfg.copiedLabel);
       setTimeout(() => { label.textContent = cfg.copyLabel; }, 2500);
+      session.set(K_DONE, '1'); // code récupéré : on ne réaffiche plus le pop-up
+      clearTimeout(timer);
     });
     $('[data-popup-cta]').addEventListener('click', () => closeDialog(dlg).then(goToOffers));
 
-    if (!cfg.enabled || session.get(KEY)) return;
-    let timer;
+    const canShow = () => cfg.enabled && !session.get(K_DONE) && count() < max;
+    if (!canShow()) return;
+
     const onMouseOut = (e) => { if (!e.relatedTarget && e.clientY <= 0) show(); };
-    function cleanup() { clearTimeout(timer); document.removeEventListener('mouseout', onMouseOut); }
-    function show() {
-      if (shown) return;
-      if ($('dialog[open]')) { clearTimeout(timer); timer = setTimeout(show, 5000); return; }
-      shown = true;
-      cleanup();
-      session.set(KEY, '1');
-      openDialog(dlg);
-      track('ViewPromo', { code: cfg.code });
-    }
-    timer = setTimeout(show, cfg.delaySeconds * 1000);
     if (cfg.exitIntent && canHover.matches) document.addEventListener('mouseout', onMouseOut);
+
+    function schedule() {
+      clearTimeout(timer);
+      if (!canShow()) { document.removeEventListener('mouseout', onMouseOut); return; }
+      const last = parseInt(session.get(K_LAST) || '0', 10);
+      const wait = count() === 0 ? cfg.delaySeconds * 1000 : Math.max(5000, last + repeatMs - Date.now());
+      if (count() > 0 && !repeatMs) return;
+      timer = setTimeout(show, wait);
+    }
+    function show() {
+      if (!canShow() || dlg.open) return;
+      // jamais par-dessus le panier ou une autre fenêtre : on réessaie un peu plus tard
+      if ($('dialog[open]')) { clearTimeout(timer); timer = setTimeout(show, 8000); return; }
+      // l'intention de sortie ne doit pas court-circuiter l'intervalle entre deux affichages
+      const last = parseInt(session.get(K_LAST) || '0', 10);
+      if (count() > 0 && Date.now() - last < repeatMs) return;
+      clearTimeout(timer);
+      session.set(K_COUNT, String(count() + 1));
+      session.set(K_LAST, String(Date.now()));
+      openDialog(dlg);
+      track('ViewPromo', { code: cfg.code, occurrence: count() });
+    }
+    // à la fermeture, on programme le prochain affichage (intervalle compté à partir de la fermeture)
+    dlg.addEventListener('close', () => { session.set(K_LAST, String(Date.now())); schedule(); });
+    schedule();
   }
 
   /* ======================================================================
@@ -975,7 +1001,7 @@
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => e.target.classList.toggle('is-live', e.isIntersecting));
     });
-    $$('.btn--glow').forEach((b) => io.observe(b));
+    $$('.btn--glow, .shade-grid').forEach((b) => io.observe(b));
     // boutons créés plus tard (tiroir panier) : toujours animés
     new MutationObserver(() => $$('.drawer .btn--glow').forEach(live)).observe($('[data-cart-foot]'), { childList: true });
   }
