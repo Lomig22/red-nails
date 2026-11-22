@@ -551,11 +551,8 @@
     if (changed && !opts.silent) {
       gallery.swap();
       live(`Teinte sélectionnée : ${color.name}`);
-      try {
-        const u = new URL(window.location.href);
-        u.searchParams.set('couleur', id);
-        window.history.replaceState(null, '', u);
-      } catch (e) { /* file:// */ }
+      // Volontairement, l'adresse de la page n'est PAS modifiée : un rechargement ou un
+      // lien partagé ramène toujours sur la teinte par défaut (Bordeaux, celle des pubs).
     }
   }
 
