@@ -297,7 +297,7 @@ window.RN_CONFIG = {
   META_PIXEL_ID: '2750897045307789',
   CONSENT: {
     enabled: true,
-    text: 'Nous utilisons des cookies pour mesurer l’efficacité de nos publicités (Meta). Tu peux accepter ou refuser : ça ne change rien à ta commande.',
+    text: 'Nous utilisons des cookies pour mesurer l’efficacité de nos publicités et l’activité du site (Meta et Whop). Tu peux accepter ou refuser : ça ne change rien à ta commande.',
     accept: 'Accepter',
     refuse: 'Refuser',
     more: 'En savoir plus',

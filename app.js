@@ -116,7 +116,11 @@
     const answer = (choice) => {
       consentStore.set(choice);
       banner.hidden = true;
-      if (choice === 'granted') { loadMetaPixel(); if (typeof window.fbq === 'function') window.fbq('consent', 'grant'); }
+      if (choice === 'granted') {
+        loadMetaPixel(); if (typeof window.fbq === 'function') window.fbq('consent', 'grant');
+        // Pixel Whop (code officiel dans le <head>), même consentement que Meta
+        if (typeof window.rnLoadWhopPixel === 'function') window.rnLoadWhopPixel();
+      }
       else { pixelQueue.length = 0; if (typeof window.fbq === 'function') window.fbq('consent', 'revoke'); }
     };
     $$('[data-consent-choice]').forEach((b) => b.addEventListener('click', () => answer(b.dataset.consentChoice)));

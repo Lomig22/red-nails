@@ -80,7 +80,10 @@
   $$('[data-consent-choice]').forEach((b) => b.addEventListener('click', () => {
     setConsent(b.dataset.consentChoice);
     banner.hidden = true;
-    if (b.dataset.consentChoice === 'granted') loadPixel();
+    if (b.dataset.consentChoice === 'granted') {
+      loadPixel();
+      if (typeof window.rnLoadWhopPixel === 'function') window.rnLoadWhopPixel(); // pixel Whop (code dans le <head>)
+    }
   }));
   $('[data-consent-open]').addEventListener('click', () => { banner.hidden = false; });
 
