@@ -615,3 +615,6 @@ dialog::backdrop { background: rgba(14, 11, 12, .55); backdrop-filter: blur(2px)
 .popup__code { flex-wrap: wrap; justify-content: center; padding: 12px; }
 .popup__code .btn { white-space: nowrap; }
 .gallery.is-zoomed .gallery__hint { opacity: 0; }
+/* Compteur et indication de zoom : seulement sur la 1re photo (ne masquent pas le texte des visuels) */
+.gallery__count, .gallery__hint { transition: opacity .25s ease; }
+.gallery:not(.is-first) .gallery__count, .gallery:not(.is-first) .gallery__hint { opacity: 0; }

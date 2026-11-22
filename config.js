@@ -69,9 +69,9 @@ window.RN_CONFIG = {
     kicker: 'Gel souple · Forme amande · Effet laqué',
     price: PRIX_UNITAIRE,
     nailsPerKit: 30,
-    sizes: 10,
-    perSize: 3,
-    posesPerKit: 3, // 30 ongles = 3 poses complètes de 10 ongles (sert au calcul {posePrice})
+    sizes: 15,
+    perSize: 2,
+    posesPerKit: 1, // sert au calcul {posePrice} (prix d'une manucure complète)
 
     // ⚠️ Promesses à valider avec le fournisseur avant mise en ligne.
     promises: [
@@ -136,13 +136,27 @@ window.RN_CONFIG = {
                  par défaut, ex. ['images/bordeaux/set.jpg', …].            */
   COLORS: [
     { id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE', desc: 'Le rouge signature, brillant comme un vernis laqué.' },
-    { id: 'bordeaux', name: 'Bordeaux', hex: '#6B0F1F', variantId: 'VARIANT_BORDEAUX', desc: 'Profond et élégant, pour le soir comme pour le bureau.' },
+    {
+      id: 'bordeaux', name: 'Bordeaux', hex: '#6E0F1C', variantId: 'VARIANT_BORDEAUX', desc: 'Profond et élégant, pour le soir comme pour le bureau.',
+      // Vraies photos : l'ordre de la liste = l'ordre de la galerie.
+      images: [
+        { src: 'images/bordeaux/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
+        { src: 'images/bordeaux/set.webp', label: 'Le set', alt: 'Les 30 faux ongles {color} du kit' },
+        { src: 'images/bordeaux/finition.webp', label: 'Finition', alt: 'Faux ongles {color} à la finition brillante, rangés par taille' },
+        { src: 'images/bordeaux/contenu-kit.webp', label: 'Contenu du kit', alt: 'Contenu du kit : 15 tailles d’ongles avec leurs dimensions, lime à ongles et pastilles adhésives' },
+        { src: 'images/bordeaux/quotidien.webp', label: 'Au quotidien', alt: 'Ongles rouges au quotidien : taper au clavier, jardiner, faire la vaisselle, jouer avec son chien' },
+      ],
+      thumbImage: 0, // photo utilisée pour la vignette (cartes couleur, barre collante, panier)
+      kitImage: 3, // photo utilisée dans la section "Ce que contient ton kit"
+    },
     { id: 'nude-rose', name: 'Nude Rosé', hex: '#D8A496', variantId: 'VARIANT_NUDE_ROSE', desc: 'L’effet ongles naturels parfaits, en plus brillant.' },
     { id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE', desc: 'Un noir miroir, intense et graphique.' },
     { id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC', desc: 'La French intemporelle, bout blanc net.' },
     { id: 'rose-bonbon', name: 'Rose Bonbon', hex: '#EE5D92', variantId: 'VARIANT_ROSE_BONBON', desc: 'Un rose acidulé, joyeux et pop.' },
   ],
-  DEFAULT_COLOR: 'rouge-cerise',
+  // Couleur affichée à l'arrivée : celle qui a de vraies photos.
+  // (si tu la changes, mets aussi à jour la 1re image et le preload dans index.html)
+  DEFAULT_COLOR: 'bordeaux',
 
   /* ---------- Galerie (5 vues par couleur) ----------
      Les images sont cherchées dans /images/[id-couleur]/[file].[IMAGE_EXT].
@@ -153,7 +167,7 @@ window.RN_CONFIG = {
     { file: '1-set', label: 'Le set', alt: 'Set de 30 faux ongles {color} en gel souple' },
     { file: '2-main', label: 'Sur la main', alt: 'Faux ongles {color} posés sur une main' },
     { file: '3-finition', label: 'Finition', alt: 'Gros plan sur la finition laquée d’un ongle {color}' },
-    { file: '4-tailles', label: 'Les 10 tailles', alt: 'Les 10 tailles de faux ongles {color}' },
+    { file: '4-tailles', label: 'Les tailles', alt: 'Les {sizes} tailles de faux ongles {color}' },
     { file: '5-kit', label: 'Le kit', alt: 'Kit complet RED NAILS {color} avec ses accessoires' },
   ],
 
@@ -239,18 +253,18 @@ window.RN_CONFIG = {
       ourLabel: 'RED NAILS',
       ourUnit: 'l’ongle',
       line: 'Une pose en institut : {salonPrice} et plus. Chez nous : {perNail} l’ongle.',
-      barsTitle: 'Prix d’une pose complète (10 ongles)',
+      barsTitle: 'Prix d’une manucure complète',
       barSalon: 'Institut',
       barOurs: 'RED NAILS',
-      footnote: '1 kit = {nails} ongles = 3 poses complètes, soit {posePrice} la pose.',
+      footnote: 'Le kit entier ({nails} ongles) coûte moins cher qu’une seule pose en institut, et il est réutilisable.',
     },
 
     steps: {
       eyebrow: 'Simple comme bonjour',
       title: 'Comment ça marche',
       items: [
-        { title: 'Choisis ta taille', text: 'Associe une des {sizes} tailles à chaque doigt : l’ongle doit couvrir le tien d’un bord à l’autre.' },
-        { title: 'Colle', text: 'Une goutte de colle, pose de la cuticule vers la pointe, puis presse 10 secondes.' },
+        { title: 'Choisis ta taille', text: 'Parmi les {sizes} tailles, trouve celle de chaque doigt : l’ongle doit couvrir le tien d’un bord à l’autre.' },
+        { title: 'Pose la pastille', text: 'Colle une pastille adhésive sur ton ongle, retire le film, pose le faux ongle et presse 30 secondes.' },
         { title: 'C’est fini, 10 min', text: 'Une manucure brillante en 10 minutes, sans lampe UV ni rendez-vous.' },
       ],
     },
@@ -268,12 +282,10 @@ window.RN_CONFIG = {
       eyebrow: 'Tout est inclus',
       title: 'Ce que contient ton kit',
       items: [
-        '30 faux ongles en gel souple, forme amande ({sizes} tailles × {perSize})',
-        '1 tube de colle à ongles',
-        '1 mini lime',
-        '1 bâtonnet repousse-cuticules',
-        '1 lingette dégraissante',
-        'Le mode d’emploi illustré',
+        '30 faux ongles en gel souple, forme amande',
+        '{sizes} tailles, {perSize} ongles de chaque',
+        '1 planche de pastilles adhésives',
+        '1 lime à ongles',
       ],
     },
 
@@ -283,19 +295,19 @@ window.RN_CONFIG = {
       items: [
         {
           q: 'Combien de temps ça tient ?',
-          a: 'Jusqu’à 2 semaines selon la pose. Pour une tenue maximale : ongles propres, secs et dégraissés avec la lingette, bonne taille pour chaque doigt, et pas d’eau chaude pendant l’heure qui suit la pose.',
+          a: 'Jusqu’à 2 semaines selon la pose. Pour une tenue maximale : ongles propres et bien secs, bonne taille pour chaque doigt, pastille bien pressée, et pas d’eau chaude pendant l’heure qui suit la pose.',
         },
         {
           q: 'Comment je choisis ma taille ?',
-          a: 'Le kit contient {sizes} tailles, {perSize} ongles de chaque. Présente chaque faux ongle sur ton ongle naturel avant de coller : il doit le couvrir d’un bord à l’autre sans toucher la peau. Entre deux tailles, prends la plus grande et lime légèrement les côtés.',
+          a: 'Le kit contient {sizes} tailles, {perSize} ongles de chaque. Présente chaque faux ongle sur ton ongle naturel avant de poser la pastille : il doit le couvrir d’un bord à l’autre sans toucher la peau. Entre deux tailles, prends la plus grande et lime légèrement les côtés.',
         },
         {
           q: 'Comment je les retire sans abîmer mes ongles ?',
-          a: 'Plonge tes doigts 10 à 15 minutes dans de l’eau tiède savonneuse, puis soulève doucement le bord avec le bâtonnet. Ne force jamais et n’arrache pas : la colle se détache toute seule quand elle est ramollie.',
+          a: 'Plonge tes doigts quelques minutes dans de l’eau tiède savonneuse, puis soulève doucement le côté du faux ongle. Ne force jamais et n’arrache pas : la pastille adhésive se décolle sans abîmer ton ongle naturel.',
         },
         {
           q: 'Ils sont réutilisables ?',
-          a: 'Oui. Retire-les délicatement, nettoie les résidus de colle, laisse sécher et range-les dans leur boîte. Tu pourras les reposer avec une nouvelle goutte de colle.',
+          a: 'Oui. Retire-les délicatement, enlève les restes de pastille, laisse sécher et range-les dans leur boîte. Tu pourras les reposer avec de nouvelles pastilles adhésives.',
         },
         {
           q: 'Quand vais-je recevoir ma commande ?',

@@ -127,12 +127,31 @@
   };
   const currentBundle = () => BUNDLES[state.bundle];
 
-  /** Chemin d'une image : config couleur.images, sinon /images/[id]/[file].[ext] */
-  function imageSrc(color, viewIndex) {
-    if (Array.isArray(color.images) && color.images[viewIndex]) return color.images[viewIndex];
-    return `images/${color.id}/${C.GALLERY_VIEWS[viewIndex].file}.${C.IMAGE_EXT}`;
+  /**
+   * Galerie d'une couleur : liste de { src, alt, label }.
+   * - si la couleur a ses propres photos (color.images dans config.js), on les utilise ;
+   * - sinon visuels par défaut /images/[id]/[file].[IMAGE_EXT] (GALLERY_VIEWS).
+   */
+  function galleryOf(color) {
+    if (Array.isArray(color.images) && color.images.length) {
+      return color.images.map((img, i) => {
+        const v = C.GALLERY_VIEWS[i] || C.GALLERY_VIEWS[0];
+        if (typeof img === 'string') return { src: img, alt: t(v.alt, { color: color.name }), label: v.label };
+        return { src: img.src, alt: t(img.alt || v.alt, { color: color.name }), label: img.label || v.label };
+      });
+    }
+    return C.GALLERY_VIEWS.map((v) => ({
+      src: `images/${color.id}/${v.file}.${C.IMAGE_EXT}`,
+      alt: t(v.alt, { color: color.name }),
+      label: v.label,
+    }));
   }
-  const imageAlt = (color, viewIndex) => t(C.GALLERY_VIEWS[viewIndex].alt, { color: color.name });
+  const imageAt = (color, i) => { const g = galleryOf(color); return g[clamp(i, 0, g.length - 1)]; };
+  const imageSrc = (color, i) => imageAt(color, i).src;
+  const imageAlt = (color, i) => imageAt(color, i).alt;
+  /** Vignette (cartes couleur, barre collante, panier) et visuel de la section "kit". */
+  const thumbIndex = (color) => (color.thumbImage != null ? color.thumbImage : 2);
+  const kitIndex = (color) => (color.kitImage != null ? color.kitImage : 4);
 
   /** Petites icônes SVG (inline, pas de requête). */
   const ICONS = {
@@ -227,9 +246,10 @@
   const gallery = {
     vp: null,
     zoomed: false,
+    count: 0,
 
     render() {
-      const views = C.GALLERY_VIEWS;
+      const views = galleryOf(state.color);
       const track = $('[data-render="slides"]');
       const slide = (i) => `
         <div class="gallery__slide" role="group" aria-roledescription="diapositive" aria-label="${i + 1} sur ${views.length}">
@@ -239,7 +259,7 @@
       // Si la 1re image écrite en dur dans index.html est la bonne, on la garde
       // (pas de re-téléchargement ni de nouveau "LCP") et on ajoute les suivantes.
       const first = track.querySelector('.gallery__slide img');
-      if (first && first.getAttribute('src') === imageSrc(state.color, 0)) {
+      if (first && first.getAttribute('src') === views[0].src) {
         const s = first.parentElement;
         s.setAttribute('role', 'group');
         s.setAttribute('aria-roledescription', 'diapositive');
@@ -250,9 +270,10 @@
       } else {
         track.innerHTML = views.map((v, i) => slide(i)).join('');
       }
+      this.count = views.length;
       $('[data-render="thumbs"]').innerHTML = views.map((v, i) => `
         <button class="thumb" type="button" data-thumb="${i}" aria-label="Voir la photo : ${esc(v.label)}" aria-current="${i === 0}">
-          <img src="${esc(imageSrc(state.color, i))}" alt="" width="76" height="76" loading="lazy" decoding="async">
+          <img src="${esc(v.src)}" alt="" width="76" height="76" loading="lazy" decoding="async">
         </button>`).join('');
     },
 
@@ -260,8 +281,13 @@
     swap(color) {
       const track = $('[data-render="slides"]');
       const apply = () => {
-        $$('.gallery__slide img', track).forEach((img, i) => { img.src = imageSrc(color, i); img.alt = imageAlt(color, i); });
-        $$('.thumb img').forEach((img, i) => { img.src = imageSrc(color, i); });
+        // Chaque couleur peut avoir sa propre galerie (nombre et ordre des photos) :
+        // on reconstruit les diapositives et on revient à la 1re photo.
+        this.unzoom();
+        track.textContent = '';
+        this.render();
+        this.vp.scrollLeft = 0;
+        this.setActive(0);
         track.classList.remove('is-swapping');
       };
       if (reducedMotion.matches) return apply();
@@ -270,7 +296,7 @@
     },
 
     goTo(i, smooth = true) {
-      const n = C.GALLERY_VIEWS.length;
+      const n = this.count;
       i = (i + n) % n;
       this.unzoom();
       this.vp.scrollTo({ left: i * this.vp.clientWidth, behavior: smooth && !reducedMotion.matches ? 'smooth' : 'auto' });
@@ -279,8 +305,9 @@
 
     setActive(i) {
       state.slide = i;
+      if (this.vp) this.vp.parentElement.classList.toggle('is-first', i === 0);
       $$('.thumb').forEach((b, k) => b.setAttribute('aria-current', String(k === i)));
-      $('[data-gallery-count]').textContent = `${i + 1} / ${C.GALLERY_VIEWS.length}`;
+      $('[data-gallery-count]').textContent = `${i + 1} / ${this.count}`;
     },
 
     currentImg() { return $$('.gallery__slide img', this.vp)[state.slide]; },
@@ -320,7 +347,7 @@
         ticking = true;
         requestAnimationFrame(() => {
           const i = Math.round(vp.scrollLeft / vp.clientWidth);
-          if (i !== state.slide) this.setActive(clamp(i, 0, C.GALLERY_VIEWS.length - 1));
+          if (i !== state.slide) this.setActive(clamp(i, 0, this.count - 1));
           ticking = false;
         });
       }, { passive: true });
@@ -382,7 +409,7 @@
     $('[data-render="color-cards"]').innerHTML = COLORS.map((c) => `
       <li>
         <button class="color-card" type="button" data-color-card="${esc(c.id)}" aria-pressed="${c === state.color}">
-          <span class="color-card__media"><img src="${esc(imageSrc(c, 2))}" alt="" width="400" height="400" loading="lazy" decoding="async"></span>
+          <span class="color-card__media"><img src="${esc(imageSrc(c, thumbIndex(c)))}" alt="" width="400" height="400" loading="lazy" decoding="async"></span>
           <span class="color-card__body">
             <span class="color-card__name"><i style="${swatchStyle(c)}"></i>${esc(c.name)}</span>
             <span class="color-card__desc">${esc(c.desc || '')}</span>
@@ -419,11 +446,11 @@
     });
     $$('[data-color-dot]').forEach((dot) => { dot.style.setProperty('--c', color.hex); });
     $('[data-add-label]').textContent = t(C.TEXTS.product.addToCart, { color: color.name });
-    $('[data-sticky-thumb]').src = imageSrc(color, 2);
+    $('[data-sticky-thumb]').src = imageSrc(color, thumbIndex(color));
     $('[data-sticky-thumb]').alt = color.name;
     const kitImg = $('[data-kit-img]');
-    kitImg.src = imageSrc(color, 4);
-    kitImg.alt = imageAlt(color, 4);
+    kitImg.src = imageSrc(color, kitIndex(color));
+    kitImg.alt = imageAlt(color, kitIndex(color));
 
     if (changed && !opts.silent) {
       gallery.swap(color);
@@ -655,7 +682,7 @@
       const regular = round2(UNIT * l.kits);
       return `
         <div class="line">
-          <img src="${esc(imageSrc(c, 2))}" alt="" width="72" height="72">
+          <img src="${esc(imageSrc(c, thumbIndex(c)))}" alt="" width="72" height="72">
           <div>
             <p class="line__title">${esc(P.title)} – ${esc(c.name)}</p>
             <p class="line__meta">${esc(t(tx.kitsLabel, { count: l.kits, nails: nailsFor(l.kits) }))}</p>

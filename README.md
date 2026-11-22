@@ -75,16 +75,34 @@ Le texte « Commande dans 2 h 13 min → expédiée aujourd'hui · Livrée entre
 
 ### Photos
 
-Les visuels actuels sont des SVG provisoires générés automatiquement. Pour mettre tes photos :
+**Bordeaux** a ses vraies photos (`images/bordeaux/*.webp`). Les autres couleurs utilisent
+encore des visuels SVG générés, en attendant leurs photos.
 
-1. Dépose-les dans `images/[id-couleur]/` avec **le même nom** :
-   `1-set`, `2-main`, `3-finition`, `4-tailles`, `5-kit` (ex. `images/bordeaux/1-set.webp`).
-2. Dans `config.js`, passe `IMAGE_EXT: 'svg'` à `'webp'` (ou `'jpg'`).
+**Ajouter les photos d'une couleur** (ex. le futur bleu) :
 
-Conseils : format carré **1600 × 1600 px** (le zoom ×2,5 a besoin de détails), WebP ≈ 150–250 Ko.
-Pour des noms de fichiers libres, renseigne `images: ['images/bordeaux/photo-a.jpg', …]` (5 chemins) dans la couleur.
-Pense aussi à mettre à jour la ligne `<link rel="preload" as="image" …>` et la 1re image de la galerie
-dans `index.html` si tu changes la couleur par défaut ou l'extension.
+1. Convertis tes photos en **WebP** (format carré, 1200–1600 px, ≈ 50–150 Ko chacune) et dépose-les
+   dans `images/[id-couleur]/`, ex. `images/bleu/main.webp`.
+2. Dans `config.js`, ajoute la liste `images` à la couleur, dans l'ordre de la galerie :
+
+```js
+{
+  id: 'bleu', name: 'Bleu Nuit', hex: '#1B2A6B', variantId: 'VARIANT_BLEU', desc: '…',
+  images: [
+    { src: 'images/bleu/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} posés sur des mains' },
+    { src: 'images/bleu/set.webp',  label: 'Le set',      alt: 'Les 30 faux ongles {color} du kit' },
+    // … autant de photos que tu veux
+  ],
+  thumbImage: 0, // photo utilisée en vignette (cartes couleur, barre collante, panier)
+  kitImage: 3,   // photo utilisée dans « Ce que contient ton kit »
+},
+```
+
+`label` s'affiche sur les miniatures (lecteurs d'écran), `alt` décrit la photo (accessibilité et SEO).
+Une couleur sans `images` garde ses visuels générés (`node tools/generate-placeholders.js`).
+
+La couleur affichée à l'arrivée est `DEFAULT_COLOR` (actuellement `bordeaux`). Si tu la changes,
+mets aussi à jour dans `index.html` la ligne `<link rel="preload" as="image" …>` et la 1re image
+de la galerie (même chemin que la 1re photo de la couleur) : c'est ce qui rend l'affichage instantané.
 
 ### Textes, FAQ, pop-up, avis
 
@@ -113,7 +131,8 @@ automatiquement `ViewContent`, `AddToCart` et `InitiateCheckout` (fonction `trac
 
 ## ⚠️ À valider avant la mise en ligne
 
-- **Promesses produit** (pose 10 min, réutilisable, tenue 2 semaines) et **contenu du kit** : avec le fournisseur.
+- **Promesses produit** (pose 10 min, réutilisable, tenue jusqu'à 2 semaines) : avec le fournisseur.
+  La tenue « 2 semaines » est surtout atteinte avec de la colle ; le kit contient des pastilles adhésives.
 - **« Le plus choisi »** sur le lot de 3 : doit refléter tes ventes réelles, sinon mets `highlight: ''`.
 - **« Satisfaite ou remboursée 14 jours »** (bandeau) va plus loin que le simple droit de rétractation.
   Vérifie que tes CGV le prévoient bien, notamment pour des ongles déjà posés (hygiène).

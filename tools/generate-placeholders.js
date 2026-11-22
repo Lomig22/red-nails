@@ -7,8 +7,8 @@
 
    Usage :  node tools/generate-placeholders.js
    (à relancer si tu ajoutes une couleur dans config.js)
-   Les fichiers existants autres que .svg (tes vraies photos) ne sont jamais
-   touchés.
+   Les couleurs qui ont leurs propres photos (images: [...] dans config.js)
+   sont ignorées, et les fichiers autres que .svg ne sont jamais touchés.
    ========================================================================== */
 'use strict';
 const fs = require('fs');
@@ -20,6 +20,8 @@ const ctx = { window: {} };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(ROOT, 'config.js'), 'utf8'), ctx);
 const CFG = ctx.window.RN_CONFIG;
+const SIZES = CFG.PRODUCT.sizes;      // 15
+const PER_SIZE = CFG.PRODUCT.perSize; // 2
 
 /* ---------- Couleurs ---------- */
 const rgb = (h) => [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16));
@@ -95,9 +97,12 @@ const caption = (txt, y = 742) => `<text x="400" y="${y}" text-anchor="middle" $
 /* ---------- Vue 1 : set de 30 ongles ---------- */
 function viewSet(c) {
   let body = `<rect x="40" y="96" width="720" height="580" rx="36" fill="#fff" filter="url(#sh)"/>`;
-  [230, 400, 570].forEach((y) => {
-    for (let i = 0; i < 10; i++) body += nail(c, 103 + i * 66, y, 0.66 - i * 0.025);
-  });
+  const step = 680 / SIZES;
+  const rowGap = 520 / PER_SIZE;
+  for (let r = 0; r < PER_SIZE; r++) {
+    const y = 96 + rowGap * (r + 0.5) + 10;
+    for (let i = 0; i < SIZES; i++) body += nail(c, 60 + step * (i + 0.5), y, (step * 0.86) / 84 * (1 - i * 0.022));
+  }
   return svg(c, body + caption(`30 ONGLES · ${c.name.toUpperCase()}`), `Set de 30 faux ongles ${c.name}`);
 }
 
@@ -133,29 +138,39 @@ function viewFinish(c) {
 
 /* ---------- Vue 4 : les 10 tailles ---------- */
 function viewSizes(c) {
-  let body = `<text x="400" y="150" text-anchor="middle" ${FONT} font-size="34" fill="#1A1416">10 TAILLES</text>
-  <text x="400" y="196" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#5E4B50">3 ongles de chaque</text>`;
-  for (let i = 0; i < 10; i++) {
-    const x = 85 + i * 70;
-    body += nail(c, x, 390, 0.74 - i * 0.03);
-    body += `<circle cx="${x}" cy="540" r="22" fill="#fff" stroke="#E8CDD2" stroke-width="2"/>
-    <text x="${x}" y="549" text-anchor="middle" ${FONT} font-size="22" fill="#1A1416">${i}</text>`;
+  let body = `<text x="400" y="120" text-anchor="middle" ${FONT} font-size="34" fill="#1A1416">${SIZES} TAILLES</text>
+  <text x="400" y="162" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" fill="#5E4B50">${PER_SIZE} ongles de chaque</text>`;
+  const perRow = Math.ceil(SIZES / 2);
+  for (let i = 0; i < SIZES; i++) {
+    const row = i < perRow ? 0 : 1;
+    const col = row ? i - perRow : i;
+    const count = row ? SIZES - perRow : perRow;
+    const x = 400 + (col - (count - 1) / 2) * 88;
+    const y = row ? 520 : 290;
+    body += nail(c, x, y, 0.62 - i * 0.017);
+    body += `<circle cx="${x}" cy="${y + 92}" r="19" fill="#fff" stroke="#E8CDD2" stroke-width="2"/>
+    <text x="${x}" y="${y + 100}" text-anchor="middle" ${FONT} font-size="18" fill="#1A1416">${i + 1}</text>`;
   }
-  return svg(c, body + caption('DU PLUS GRAND AU PLUS PETIT', 660), `Les 10 tailles de faux ongles ${c.name}`);
+  return svg(c, body + caption('DU PLUS GRAND AU PLUS PETIT', 742), `Les ${SIZES} tailles de faux ongles ${c.name}`);
 }
 
 /* ---------- Vue 5 : kit complet ---------- */
+function pastilles() {
+  let out = '';
+  for (let r = 0; r < 3; r++) for (let k = 0; k < 6; k++) out += `<rect x="${462 + k * 29}" y="${608 + r * 24}" width="22" height="18" rx="7" fill="#F3ECEA" stroke="#DCCFCB"/>`;
+  return out;
+}
 function viewKit(c) {
   let tray = '';
-  for (let i = 0; i < 10; i++) tray += nail(c, 205 + i * 44, 390, 0.44 - i * 0.012);
+  for (let i = 0; i < SIZES; i++) tray += nail(c, 198 + i * 29, 390, 0.32 - i * 0.006);
   const body = `
   <rect x="110" y="140" width="580" height="420" rx="34" fill="#0E0B0C" filter="url(#sh)"/>
   <text x="400" y="222" text-anchor="middle" ${FONT} font-size="44" fill="#fff" letter-spacing="3">RED <tspan fill="${c.hex === '#121012' ? '#C8102E' : light(c.hex, 0.05)}">NAILS</tspan></text>
   <rect x="160" y="262" width="480" height="250" rx="22" fill="#FFF5F6"/>
   ${tray}
   <text x="400" y="488" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" fill="#5E4B50">${c.name} · 30 ongles</text>
-  <g transform="rotate(-8 250 640)"><rect x="140" y="620" width="230" height="30" rx="15" fill="#E9D3C6"/><rect x="140" y="620" width="115" height="30" rx="15" fill="#CDB2A2"/></g>
-  <g transform="rotate(6 520 640)"><rect x="440" y="612" width="150" height="46" rx="16" fill="#fff" stroke="#E8CDD2" stroke-width="2"/><rect x="586" y="622" width="44" height="26" rx="8" fill="#0E0B0C"/><text x="510" y="642" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" fill="#1A1416">COLLE</text></g>
+  <g transform="rotate(-8 250 640)"><rect x="140" y="620" width="230" height="30" rx="15" fill="#FF3D9A"/></g>
+  <g transform="rotate(5 540 640)"><rect x="450" y="598" width="190" height="84" rx="10" fill="#fff" stroke="#E8CDD2" stroke-width="2"/>${pastilles()}</g>
   ${caption('LE KIT COMPLET', 742)}`;
   return svg(c, body, `Kit complet RED NAILS ${c.name}`);
 }
@@ -163,7 +178,7 @@ function viewKit(c) {
 /* ---------- Écriture ---------- */
 const VIEWS = { '1-set': viewSet, '2-main': viewHand, '3-finition': viewFinish, '4-tailles': viewSizes, '5-kit': viewKit };
 let count = 0;
-CFG.COLORS.forEach((c) => {
+CFG.COLORS.filter((c) => !(Array.isArray(c.images) && c.images.length)).forEach((c) => {
   const dir = path.join(ROOT, 'images', c.id);
   fs.mkdirSync(dir, { recursive: true });
   Object.entries(VIEWS).forEach(([file, fn]) => {
