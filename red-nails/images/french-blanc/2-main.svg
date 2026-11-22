@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" role="img" aria-label="Faux ongles French Blanc posés sur une main">
+<defs>
+  <linearGradient id="nb" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#ae9892"/>
+    <stop offset=".3" stop-color="#f3d8d1"/>
+    <stop offset=".62" stop-color="#F1D3CB"/>
+    <stop offset="1" stop-color="#9f8b86"/>
+  </linearGradient>
+  <linearGradient id="nv" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+    <stop offset=".45" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".16"/>
+  </linearGradient>
+  <linearGradient id="hl" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="tip" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#F4F0EE"/>
+    <stop offset=".5" stop-color="#FFFFFF"/>
+    <stop offset="1" stop-color="#EDE6E3"/>
+  </linearGradient>
+  <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#D9A383"/>
+    <stop offset=".45" stop-color="#F0C8AE"/>
+    <stop offset="1" stop-color="#D49C7C"/>
+  </linearGradient>
+  <radialGradient id="bg" cx=".5" cy=".38" r=".8">
+    <stop offset="0" stop-color="#FFFFFF"/>
+    <stop offset="1" stop-color="#fceff1"/>
+  </radialGradient>
+  <filter id="sh" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#3A0A14" flood-opacity=".22"/>
+  </filter>
+</defs>
+<rect width="800" height="800" fill="url(#bg)"/>
+
+  <g transform="rotate(-52 300 670)">
+    <rect x="248" y="430" width="104" height="300" rx="52" fill="url(#skin)"/>
+    <g transform="translate(300 452) rotate(0) scale(0.9904761904761905) translate(-50 -80)" filter="url(#sh)">
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nb)"/>
+  <path d="M8 82 C8 46 26 14 50 2 C74 14 92 46 92 82 C80 62 64 54 50 54 C36 54 20 62 8 82Z" fill="url(#tip)"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nv)"/>
+  <path d="M27 40 C20 62 18 96 20 132 C23 137 28 137 30 132 C28 98 30 66 37 34 C34 30 30 32 27 40Z" fill="url(#hl)" opacity=".7"/>
+  <ellipse cx="66" cy="46" rx="5" ry="11" transform="rotate(22 66 46)" fill="#fff" opacity=".6"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="none" stroke="#857470" stroke-opacity="0.6" stroke-width="1.8"/>
+</g>
+  </g>
+  <path d="M240 520 Q240 470 300 470 L600 470 Q668 470 668 540 L668 820 L250 820 Z" fill="url(#skin)"/>
+  <g transform="rotate(-8 300 640)">
+  <rect x="253" y="210" width="94" height="490" rx="47" fill="url(#skin)"/>
+  <g transform="translate(300 228.8) rotate(0) scale(0.8952380952380953) translate(-50 -80)" filter="url(#sh)">
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nb)"/>
+  <path d="M8 82 C8 46 26 14 50 2 C74 14 92 46 92 82 C80 62 64 54 50 54 C36 54 20 62 8 82Z" fill="url(#tip)"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nv)"/>
+  <path d="M27 40 C20 62 18 96 20 132 C23 137 28 137 30 132 C28 98 30 66 37 34 C34 30 30 32 27 40Z" fill="url(#hl)" opacity=".7"/>
+  <ellipse cx="66" cy="46" rx="5" ry="11" transform="rotate(22 66 46)" fill="#fff" opacity=".6"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="none" stroke="#857470" stroke-opacity="0.6" stroke-width="1.8"/>
+</g>
+</g>
+  <g transform="rotate(-2 408 640)">
+  <rect x="358" y="160" width="100" height="540" rx="50" fill="url(#skin)"/>
+  <g transform="translate(408 180) rotate(0) scale(0.9523809523809523) translate(-50 -80)" filter="url(#sh)">
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nb)"/>
+  <path d="M8 82 C8 46 26 14 50 2 C74 14 92 46 92 82 C80 62 64 54 50 54 C36 54 20 62 8 82Z" fill="url(#tip)"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nv)"/>
+  <path d="M27 40 C20 62 18 96 20 132 C23 137 28 137 30 132 C28 98 30 66 37 34 C34 30 30 32 27 40Z" fill="url(#hl)" opacity=".7"/>
+  <ellipse cx="66" cy="46" rx="5" ry="11" transform="rotate(22 66 46)" fill="#fff" opacity=".6"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="none" stroke="#857470" stroke-opacity="0.6" stroke-width="1.8"/>
+</g>
+</g>
+  <g transform="rotate(4 512 640)">
+  <rect x="465" y="196" width="94" height="504" rx="47" fill="url(#skin)"/>
+  <g transform="translate(512 214.8) rotate(0) scale(0.8952380952380953) translate(-50 -80)" filter="url(#sh)">
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nb)"/>
+  <path d="M8 82 C8 46 26 14 50 2 C74 14 92 46 92 82 C80 62 64 54 50 54 C36 54 20 62 8 82Z" fill="url(#tip)"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nv)"/>
+  <path d="M27 40 C20 62 18 96 20 132 C23 137 28 137 30 132 C28 98 30 66 37 34 C34 30 30 32 27 40Z" fill="url(#hl)" opacity=".7"/>
+  <ellipse cx="66" cy="46" rx="5" ry="11" transform="rotate(22 66 46)" fill="#fff" opacity=".6"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="none" stroke="#857470" stroke-opacity="0.6" stroke-width="1.8"/>
+</g>
+</g>
+  <g transform="rotate(11 606 640)">
+  <rect x="566" y="290" width="80" height="410" rx="40" fill="url(#skin)"/>
+  <g transform="translate(606 306) rotate(0) scale(0.7619047619047619) translate(-50 -80)" filter="url(#sh)">
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nb)"/>
+  <path d="M8 82 C8 46 26 14 50 2 C74 14 92 46 92 82 C80 62 64 54 50 54 C36 54 20 62 8 82Z" fill="url(#tip)"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="url(#nv)"/>
+  <path d="M27 40 C20 62 18 96 20 132 C23 137 28 137 30 132 C28 98 30 66 37 34 C34 30 30 32 27 40Z" fill="url(#hl)" opacity=".7"/>
+  <ellipse cx="66" cy="46" rx="5" ry="11" transform="rotate(22 66 46)" fill="#fff" opacity=".6"/>
+  <path d="M50 2 C74 14 92 48 92 88 L92 136 C92 150 74 158 50 158 C26 158 8 150 8 136 L8 88 C8 48 26 14 50 2Z" fill="none" stroke="#857470" stroke-opacity="0.6" stroke-width="1.8"/>
+</g>
+</g>
+</svg>
