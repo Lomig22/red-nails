@@ -75,21 +75,25 @@ Le texte « Commande dans 2 h 13 min → expédiée aujourd'hui · Livrée entre
 
 ### Photos
 
-**Bordeaux** a ses vraies photos (`images/bordeaux/*.webp`). Les autres couleurs utilisent
-encore des visuels SVG générés, en attendant leurs photos.
+**Bordeaux** et **Bleu Nuit** ont leurs vraies photos (`images/bordeaux/`, `images/bleu-nuit/`).
+Les autres couleurs utilisent encore des visuels SVG générés, en attendant leurs photos.
 
-**Ajouter les photos d'une couleur** (ex. le futur bleu) :
+**Ordre des couleurs** : c'est l'ordre de la liste `COLORS` dans `config.js` (Bordeaux en 1er).
+L'infographie « Contenu du kit » (`images/bordeaux/contenu-kit.webp`) est neutre : elle peut servir
+pour toutes les couleurs, comme pour Bleu Nuit.
+
+**Ajouter les photos d'une couleur** (ex. une future couleur) :
 
 1. Convertis tes photos en **WebP** (format carré, 1200–1600 px, ≈ 50–150 Ko chacune) et dépose-les
-   dans `images/[id-couleur]/`, ex. `images/bleu/main.webp`.
+   dans `images/[id-couleur]/`, ex. `images/vert-sapin/main.webp`.
 2. Dans `config.js`, ajoute la liste `images` à la couleur, dans l'ordre de la galerie :
 
 ```js
 {
   id: 'bleu', name: 'Bleu Nuit', hex: '#1B2A6B', variantId: 'VARIANT_BLEU', desc: '…',
   images: [
-    { src: 'images/bleu/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} posés sur des mains' },
-    { src: 'images/bleu/set.webp',  label: 'Le set',      alt: 'Les 30 faux ongles {color} du kit' },
+    { src: 'images/vert-sapin/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} posés sur des mains' },
+    { src: 'images/vert-sapin/set.webp',  label: 'Le set',      alt: 'Les 30 faux ongles {color} du kit' },
     // … autant de photos que tu veux
   ],
   thumbImage: 0, // photo utilisée en vignette (cartes couleur, barre collante, panier)

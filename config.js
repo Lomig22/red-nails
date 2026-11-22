@@ -23,6 +23,7 @@
        {cutoff}       heure limite d'expédition   → 14h
        {minDays} / {maxDays}  délais de livraison en jours ouvrés
        {returnDays}   délai de rétractation       → 14
+       {colorCount}   nombre de couleurs proposées
        {color}        couleur sélectionnée (boutons d'achat)
    ========================================================================== */
 
@@ -132,10 +133,10 @@ window.RN_CONFIG = {
      hex       : teinte de la pastille.
      tip       : (optionnel) couleur du bout, pour la French.
      variantId : ID de la variante Shopify (à remplacer).
-     images    : (optionnel) liste de 5 chemins pour remplacer les visuels
-                 par défaut, ex. ['images/bordeaux/set.jpg', …].            */
+     images    : (optionnel) vraies photos de la couleur, dans l'ordre de la
+                 galerie (voir Bordeaux ci-dessous et le README).
+     L'ORDRE DE LA LISTE = l'ordre des pastilles et des cartes couleur.      */
   COLORS: [
-    { id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE', desc: 'Le rouge signature, brillant comme un vernis laqué.' },
     {
       id: 'bordeaux', name: 'Bordeaux', hex: '#6E0F1C', variantId: 'VARIANT_BORDEAUX', desc: 'Profond et élégant, pour le soir comme pour le bureau.',
       // Vraies photos : l'ordre de la liste = l'ordre de la galerie.
@@ -149,6 +150,21 @@ window.RN_CONFIG = {
       thumbImage: 0, // photo utilisée pour la vignette (cartes couleur, barre collante, panier)
       kitImage: 3, // photo utilisée dans la section "Ce que contient ton kit"
     },
+    {
+      id: 'bleu-nuit', name: 'Bleu Nuit', hex: '#1B2A5E', variantId: 'VARIANT_BLEU_NUIT', desc: 'Un bleu marine profond, chic et inattendu.',
+      images: [
+        { src: 'images/bleu-nuit/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} en forme amande posés sur une main' },
+        { src: 'images/bleu-nuit/main-2.webp', label: 'Brillance', alt: 'Gros plan sur les faux ongles {color} et leur reflet laqué' },
+        { src: 'images/bleu-nuit/main-3.webp', label: 'Sur la main', alt: 'Mains aux faux ongles {color} en forme amande' },
+        { src: 'images/bleu-nuit/main-4.webp', label: 'Sur la main', alt: 'Faux ongles {color} posés sur deux mains' },
+        { src: 'images/bleu-nuit/finition.webp', label: 'Finition', alt: 'Faux ongles {color} en gel souple, finition brillante' },
+        // Infographie commune à toutes les couleurs (tailles, lime, pastilles)
+        { src: 'images/bordeaux/contenu-kit.webp', label: 'Contenu du kit', alt: 'Contenu du kit : 15 tailles d’ongles avec leurs dimensions, lime à ongles et pastilles adhésives' },
+      ],
+      thumbImage: 0,
+      kitImage: 5,
+    },
+    { id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE', desc: 'Le rouge signature, brillant comme un vernis laqué.' },
     { id: 'nude-rose', name: 'Nude Rosé', hex: '#D8A496', variantId: 'VARIANT_NUDE_ROSE', desc: 'L’effet ongles naturels parfaits, en plus brillant.' },
     { id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE', desc: 'Un noir miroir, intense et graphique.' },
     { id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC', desc: 'La French intemporelle, bout blanc net.' },
@@ -270,7 +286,7 @@ window.RN_CONFIG = {
     },
 
     colors: {
-      eyebrow: '6 teintes laquées',
+      eyebrow: '{colorCount} teintes laquées',
       title: 'Choisis ta couleur',
       intro: 'Touche une couleur : elle s’affiche directement dans ta fiche produit.',
       choose: 'Choisir',

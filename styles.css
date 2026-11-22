@@ -618,3 +618,7 @@ dialog::backdrop { background: rgba(14, 11, 12, .55); backdrop-filter: blur(2px)
 /* Compteur et indication de zoom : seulement sur la 1re photo (ne masquent pas le texte des visuels) */
 .gallery__count, .gallery__hint { transition: opacity .25s ease; }
 .gallery:not(.is-first) .gallery__count, .gallery:not(.is-first) .gallery__hint { opacity: 0; }
+/* La rangée de miniatures défile au lieu d'élargir la page (couleurs avec 6+ photos) */
+.product__gallery { min-width: 0; }
+/* Reflet plus discret pour ne pas délaver les vraies photos */
+.gallery::after { background: linear-gradient(105deg, transparent 42%, rgba(255, 255, 255, .22) 50%, transparent 58%); }

@@ -102,6 +102,7 @@
     minDays: D.minDays,
     maxDays: D.maxDays,
     returnDays: C.RETURN_DAYS,
+    colorCount: C.COLORS.length,
     year: new Date().getFullYear(),
   };
   /** Remplace les {variables} d'un texte. */
@@ -339,6 +340,7 @@
     init() {
       this.render();
       const vp = (this.vp = $('#gallery-viewport'));
+      this.setActive(0); // compteur "1 / N" juste dès l'arrivée
 
       // Synchronise la miniature active avec le swipe
       let ticking = false;
