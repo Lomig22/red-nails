@@ -159,6 +159,17 @@ window.RN_CONFIG = {
       thumbImage: 0, cardImage: 2, detailImage: 0, kitImage: 4,
     },
     {
+      id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE',
+      desc: 'Le rouge signature, brillant comme un vernis laqué.',
+      images: [
+        { src: 'images/rouge-cerise/main.webp', label: 'Portés', alt: 'Faux ongles {color} en forme amande posés sur une main' },
+        { src: 'images/rouge-cerise/main-2.webp', label: 'Gros plan', alt: 'Gros plan sur la brillance laquée des faux ongles {color}' },
+        KIT_CONTENT,
+        USAGE_GUIDE,
+      ],
+      thumbImage: 0, cardImage: 0, detailImage: 1, kitImage: 2,
+    },
+    {
       id: 'bleu-nuit', name: 'Bleu Nuit', hex: '#1B2A5E', variantId: 'VARIANT_BLEU_NUIT',
       desc: 'Un marine profond, chic et inattendu.',
       images: [
