@@ -506,7 +506,7 @@
   function renderBundles() {
     const tx = C.TEXTS.product;
     $('[data-render="bundles"]').innerHTML = BUNDLES.map((b, i) => `
-      <label class="bundle">
+      <label class="bundle${i === state.bundle ? ' is-checked' : ''}">
         <input type="radio" name="bundle" value="${i}" ${i === state.bundle ? 'checked' : ''}>
         <span class="bundle__radio" aria-hidden="true"></span>
         <span class="bundle__main">
@@ -533,7 +533,11 @@
 
   function setBundle(i) {
     state.bundle = i;
-    $$('input[name="bundle"]').forEach((input) => { input.checked = Number(input.value) === i; });
+    $$('input[name="bundle"]').forEach((input) => {
+      input.checked = Number(input.value) === i;
+      // classe de secours pour les navigateurs sans :has() (iOS < 15.4)
+      input.closest('.bundle').classList.toggle('is-checked', input.checked);
+    });
     updatePrice(true);
   }
 

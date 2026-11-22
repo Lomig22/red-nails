@@ -80,10 +80,8 @@
       <div class="product__info">
         <p class="kicker enter" style="--i:1" data-t="PRODUCT.kicker"></p>
         <h1 id="product-title" class="product__title enter" style="--i:2" data-t="PRODUCT.title"></h1>
-        <ul class="promises enter" style="--i:3" data-render="promises"></ul>
-
-        <!-- Prix : élément le plus visible de la page -->
-        <div class="price-box enter" style="--i:4" aria-live="polite">
+        <!-- Prix : élément le plus visible de la page (juste sous le titre, visible sans défiler) -->
+        <div class="price-box enter" style="--i:3" aria-live="polite">
           <div class="price-box__row">
             <span class="price-now" data-price-now></span>
             <s class="price-was" data-price-was hidden></s>
@@ -95,6 +93,7 @@
             <span class="per-nail__suf" data-t="TEXTS.product.perNailSuffix"></span>
           </p>
         </div>
+        <ul class="promises enter" style="--i:4" data-render="promises"></ul>
         <p class="salon-line enter" style="--i:5" data-salon-line></p>
 
         <!-- Sélecteur de couleur -->

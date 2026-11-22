@@ -163,17 +163,31 @@ window.RN_CONFIG = {
         { src: 'images/bleu-nuit/main-3.webp', label: 'Sur la main', alt: 'Mains aux faux ongles {color} en forme amande' },
         { src: 'images/bleu-nuit/main-4.webp', label: 'Sur la main', alt: 'Faux ongles {color} posés sur deux mains' },
         { src: 'images/bleu-nuit/finition.webp', label: 'Finition', alt: 'Faux ongles {color} en gel souple, finition brillante' },
-        { src: 'images/bleu-nuit/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
-        { src: 'images/bleu-nuit/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes : limer, nettoyer, coller l’adhésif, choisir la taille, appuyer, c’est terminé' },
+        { src: 'images/commun/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
+        { src: 'images/commun/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes : limer, nettoyer, coller l’adhésif, choisir la taille, appuyer, c’est terminé' },
       ],
       thumbImage: 0,
       kitImage: 5,
+    },
+    {
+      id: 'rose-bonbon', name: 'Rose Bonbon', hex: '#D81B60', variantId: 'VARIANT_ROSE_BONBON', desc: 'Un rose acidulé, joyeux et pop.',
+      // Même format que le Bleu Nuit : 24 ongles, 12 tailles (2 de chaque).
+      kit: { nailsPerKit: 24, sizes: 12, perSize: 2 },
+      images: [
+        { src: 'images/rose-bonbon/main.webp', label: 'Sur la main', alt: 'Faux ongles {color} en forme amande posés sur des mains' },
+        { src: 'images/rose-bonbon/finition.webp', label: 'Finition', alt: 'Faux ongles {color} à la finition brillante, rangés par taille' },
+        { src: 'images/rose-bonbon/set.webp', label: 'Le set', alt: 'Les 24 faux ongles {color} du kit' },
+        // Guides en français communs aux kits 24 ongles
+        { src: 'images/commun/guide-tailles.webp', label: 'Guide des tailles', alt: 'Guide des tailles : 24 ongles en 12 tailles avec leurs dimensions, et comment mesurer ses ongles' },
+        { src: 'images/commun/guide-utilisation.webp', label: 'Mode d’emploi', alt: 'Comment poser les faux ongles RED NAILS en 6 étapes : limer, nettoyer, coller l’adhésif, choisir la taille, appuyer, c’est terminé' },
+      ],
+      thumbImage: 0,
+      kitImage: 3,
     },
     { id: 'rouge-cerise', name: 'Rouge Cerise', hex: '#C8102E', variantId: 'VARIANT_ROUGE_CERISE', desc: 'Le rouge signature, brillant comme un vernis laqué.' },
     { id: 'nude-rose', name: 'Nude Rosé', hex: '#D8A496', variantId: 'VARIANT_NUDE_ROSE', desc: 'L’effet ongles naturels parfaits, en plus brillant.' },
     { id: 'noir-laque', name: 'Noir Laqué', hex: '#121012', variantId: 'VARIANT_NOIR_LAQUE', desc: 'Un noir miroir, intense et graphique.' },
     { id: 'french-blanc', name: 'French Blanc', hex: '#F1D3CB', tip: '#FFFFFF', variantId: 'VARIANT_FRENCH_BLANC', desc: 'La French intemporelle, bout blanc net.' },
-    { id: 'rose-bonbon', name: 'Rose Bonbon', hex: '#EE5D92', variantId: 'VARIANT_ROSE_BONBON', desc: 'Un rose acidulé, joyeux et pop.' },
   ],
   // Couleur affichée à l'arrivée : celle qui a de vraies photos.
   // (si tu la changes, mets aussi à jour la 1re image et le preload dans index.html)
