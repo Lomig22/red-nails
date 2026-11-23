@@ -930,3 +930,12 @@ body.has-sticky .consent { bottom: calc(80px + env(safe-area-inset-bottom)); }
   body.has-sticky .consent { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); }
 }
 @keyframes consentUp2 { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- Remise de bienvenue déjà appliquée ---------- */
+.price__promo {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+  font-size: .8rem; font-weight: 500; color: var(--green); line-height: 1.3;
+}
+.price__promo::before { content: '✓'; font-weight: 600; }
+.price__row { row-gap: 2px; }
+@media (max-width: 379px) { .price__was { font-size: 1rem; } .price__badge { font-size: .66rem; padding: 4px 7px 3px; } }

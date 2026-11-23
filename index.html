@@ -222,6 +222,8 @@
             <s class="price__was" data-price-was hidden></s>
             <span class="price__badge" data-price-badge hidden></span>
           </div>
+          <!-- Remise de bienvenue (PROMO_ACTIVE) : explique le prix barré, rien à saisir -->
+          <p class="price__promo" data-promo-note hidden></p>
           <p class="price__meta" data-price-meta></p>
         </div>
 
@@ -429,10 +431,6 @@
       <p class="eyebrow eyebrow--center" data-t="POPUP.eyebrow"></p>
       <h2 id="promo-title" class="popup__title"><span data-t="POPUP.title"></span> <em data-t="POPUP.subtitle"></em></h2>
       <p class="popup__text" data-popup-text></p>
-      <div class="popup__code" data-popup-code>
-        <code data-t="POPUP.code"></code>
-        <button class="btn btn--ghost" type="button" data-copy-code><span data-t="POPUP.copyLabel"></span></button>
-      </div>
       <button class="btn btn--primary btn--block btn--glow" type="button" data-popup-cta><span data-t="POPUP.cta"></span></button>
       <button class="link-btn" type="button" data-close><span data-t="POPUP.dismiss"></span></button>
     </div>
@@ -445,8 +443,6 @@
     <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted" data-t="CONSENT.accept"></button>
     <button class="consent__refuse" type="button" data-consent-choice="denied" data-t="CONSENT.refuse"></button>
   </div>
-
-  <p class="promo-reminder" data-promo-reminder hidden></p>
 
   <div class="sr-only" aria-live="polite" data-live></div>
   <noscript><p class="noscript">Active JavaScript pour commander sur red-nails.fr.</p></noscript>

@@ -59,11 +59,26 @@ window.RN_CONFIG = {
   CURRENCY: 'EUR',
 
   CHECKOUT_URL: CHECKOUT_URL,
-  // Code promo pré-appliqué sur le checkout Whop (paramètre ?promoCode=, testé :
-  // 24,99 € → 22,49 € affiché à l'arrivée sur Whop). null pour ne rien appliquer.
-  // Le code doit exister et être actif dans Whop (Codes promo).
-  CHECKOUT_PROMO_CODE: 'BIENVENUE10',
-  CHECKOUT_PROMO_PERCENT: 10,   // sert à afficher la remise et à calculer la valeur de l'Achat
+  /* ---------- Remise de bienvenue pré-appliquée (SOURCE UNIQUE) ----------
+     PROMO_ACTIVE contrôle À LA FOIS :
+       - l'affichage remisé partout sur le site (prix plein barré → prix remisé),
+       - l'ajout de ?promoCode=CODE aux liens de paiement Whop,
+       - la valeur envoyée au pixel Meta (montant réellement payé),
+       - la pop-up de bienvenue.
+     Mets PROMO_ACTIVE à false si le code est désactivé dans Whop : la page
+     revient automatiquement aux prix pleins.
+     Les prix remisés sont CALCULÉS (prix du lot × (1 - percent/100), arrondi au
+     centime) : 24,99 → 22,49 · 39,98 → 35,98 · 52,47 → 47,22 (vérifiés sur Whop).
+     ⚖️ Prix barré = prix plein réellement pratiqué. Si la remise devient permanente
+     pour tout le monde, le prix remisé devient le vrai prix au bout de 30 jours
+     (art. L112-1-1) : fixe une date de fin (endDate) pour qu'elle s'arrête seule.  */
+  PROMO_ACTIVE: true,
+  PROMO: {
+    code: 'BIENVENUE10',           // doit exister et être actif dans Whop (Codes promo)
+    percent: 10,                   // taux de remise, identique à celui configuré dans Whop
+    label: 'Remise de bienvenue -{promoPercent} % déjà appliquée',
+    endDate: null,                 // ex. '2026-12-31T23:59:59+01:00' → arrêt automatique
+  },
   // true une fois le webhook Whop → API Conversions Meta en place (/api/whop-webhook) :
   // l'Achat est alors envoyé par le serveur, et la page merci ne l'envoie plus que si Whop
   // fournit l'identifiant du paiement (?payment=pay_…), pour un dédoublonnage exact.
@@ -341,15 +356,10 @@ window.RN_CONFIG = {
     triggerSeconds: 50,
     triggerScrollPercent: 50,
     eyebrow: 'Bienvenue chez RED NAILS',
-    title: '-10 %',
-    subtitle: 'sur ta première commande',
-    // Remise pré-appliquée (CHECKOUT_PROMO_CODE) : rien à copier ni à saisir.
-    text: 'Ta remise est déjà appliquée : tu la verras directement sur la page de paiement.',
-    // Si CHECKOUT_PROMO_CODE est null : texte et code affichés à la place.
-    textManual: 'Saisis ce code dans « Code promo et détails », en haut de la page de paiement :',
-    code: 'BIENVENUE10',
-    copyLabel: 'Copier',
-    copiedLabel: 'Copié ✓',
+    // Pop-up affichée seulement si PROMO_ACTIVE : simple rappel, aucun code à copier.
+    title: '-{promoPercent} %',
+    subtitle: 'déjà appliqués sur ta commande',
+    text: 'Ta remise de bienvenue est déjà déduite des prix affichés. Tu n’as rien à saisir au paiement.',
     cta: 'J’en profite',
     dismiss: 'Non merci',
   },
@@ -397,7 +407,6 @@ window.RN_CONFIG = {
     ],
 
     cta: 'J’en profite · jusqu’à -{maxDiscount} %',
-    promoReminder: 'Code -10 % : {code} · à saisir dans « Code promo et détails » au paiement',
     ctaNote: 'Livraison offerte · Retours {returnDays} jours',
 
     // Section "Le détail" (remplace l'ancienne comparaison de prix)

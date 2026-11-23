@@ -190,6 +190,19 @@
   /** Prix par ongle arrondi au centime : 24,99 / 30 = 0,83 € */
   const perNail = (price, kits, color = activeColor()) => round2(price / nailsFor(kits, color));
 
+  /**
+   * Remise de bienvenue pré-appliquée — SOURCE UNIQUE (config : PROMO_ACTIVE + PROMO).
+   * Active seulement si PROMO_ACTIVE, un code, un taux > 0, et avant PROMO.endDate.
+   */
+  const PROMO = (() => {
+    const p = C.PROMO || {};
+    let active = !!C.PROMO_ACTIVE && !!p.code && Number(p.percent) > 0;
+    if (active && p.endDate && Date.now() > Date.parse(p.endDate)) active = false; // arrêt automatique
+    return { active, code: p.code, percent: Number(p.percent) || 0, label: p.label || '' };
+  })();
+  /** Prix réellement payé sur le checkout (arrondi au centime, comme Whop). */
+  const promoPrice = (value) => (PROMO.active ? round2(value * (1 - PROMO.percent / 100)) : value);
+
   /** Lots : prix barré = quantité × prix unitaire réellement pratiqué. */
   const BUNDLES = C.BUNDLES.map((b) => {
     const regular = round2(UNIT * b.qty);
@@ -199,7 +212,13 @@
     if (b.qty === 1 && C.PRIX_REFERENCE && C.PRIX_REFERENCE > b.price) compareAt = C.PRIX_REFERENCE;
     // Arrondi à l'inférieur : la réduction affichée n'est jamais surévaluée.
     const discount = compareAt ? Math.floor((1 - b.price / compareAt) * 100 + 1e-6) : 0;
-    return Object.assign({}, b, { compareAt, discount, freeShipping: b.qty >= C.SHIPPING.freeFromKits });
+    // pay    : montant affiché et payé (remise de bienvenue déduite si active)
+    // strike : prix barré affiché à côté (prix plein du lot si remise active,
+    //          sinon prix de référence / quantité × prix unitaire)
+    const pay = promoPrice(b.price);
+    const strike = PROMO.active ? b.price : compareAt;
+    const strikeOff = strike ? Math.floor((1 - pay / strike) * 100 + 1e-6) : 0;
+    return Object.assign({}, b, { compareAt, discount, pay, strike, strikeOff, freeShipping: b.qty >= C.SHIPPING.freeFromKits });
   });
   const BEST_BUNDLE = BUNDLES.reduce((best, b, i) => (b.price / b.qty < BUNDLES[best].price / BUNDLES[best].qty ? i : best), 0);
 
@@ -227,6 +246,7 @@
     maxDays: D.maxDays,
     returnDays: C.RETURN_DAYS,
     colorCount: COLORS.length,
+    promoPercent: PROMO.percent,
     year: new Date().getFullYear(),
   };
   /** Variables qui dépendent de la teinte choisie. */
@@ -582,7 +602,7 @@
   function updateShadeButtons() {
     const b = shadeBundle();
     $$('[data-color-card]').forEach((card) => {
-      $('[data-pill]', card).textContent = t(C.TEXTS.colors.buy, { price: money(b.price) });
+      $('[data-pill]', card).textContent = t(C.TEXTS.colors.buy, { price: money(b.pay) });
       $('[data-pill-meta]', card).textContent = t(C.TEXTS.colors.buyMeta, { bundle: b.label, shipping: b.freeShipping ? C.TEXTS.product.freeShipping.toLowerCase() : t(C.TEXTS.colors.shippingPaid) });
     });
   }
@@ -634,12 +654,12 @@
         <span class="bundle__radio" aria-hidden="true"></span>
         <span class="bundle__main">
           <span class="bundle__title">${esc(b.label)}${b.discount ? ` <span class="bundle__off">-${b.discount} %</span>` : ''}</span>
-          <span class="bundle__sub">${esc(t(tx.nailsCount, { count: nailsFor(b.qty) }))} · <strong>${money(perNail(b.price, b.qty))}/ongle</strong></span>
+          <span class="bundle__sub">${esc(t(tx.nailsCount, { count: nailsFor(b.qty) }))} · <strong>${money(perNail(b.pay, b.qty))}/ongle</strong></span>
           ${b.freeShipping ? `<span class="bundle__ship">${icon('truck', 14)}${esc(tx.freeShipping)}</span>` : ''}
         </span>
         <span class="bundle__price">
-          ${b.compareAt ? `<s><span class="sr-only">au lieu de </span>${money(b.compareAt)}</s>` : ''}
-          <strong>${money(b.price)}</strong>
+          ${b.strike ? `<s><span class="sr-only">au lieu de </span>${money(b.strike)}</s>` : ''}
+          <strong>${money(b.pay)}</strong>
         </span>
         ${b.highlight ? `<span class="bundle__flag">${esc(b.highlight)}</span>` : ''}
       </label>`).join('');
@@ -667,21 +687,23 @@
     const b = currentBundle();
     const tx = C.TEXTS.product;
     const now = $('[data-price-now]');
-    now.textContent = money(b.price);
+    now.textContent = money(b.pay);
     const was = $('[data-price-was]');
     const badge = $('[data-price-badge]');
-    was.hidden = badge.hidden = !b.compareAt;
-    if (b.compareAt) {
-      was.innerHTML = `<span class="sr-only">au lieu de </span>${money(b.compareAt)}`;
-      badge.textContent = `-${b.discount} %`;
+    was.hidden = badge.hidden = !b.strike;
+    if (b.strike) {
+      was.innerHTML = `<span class="sr-only">au lieu de </span>${money(b.strike)}`;
+      badge.textContent = `-${b.strikeOff} %`;
     }
-    const pn = esc(t(tx.perNail, { value: money(perNail(b.price, b.qty)) }));
-    $('[data-price-meta]').innerHTML = b.compareAt
+    const pn = esc(t(tx.perNail, { value: money(perNail(b.pay, b.qty)) }));
+    const promoNote = $('[data-promo-note]');
+    if (promoNote) { promoNote.hidden = !PROMO.active; promoNote.textContent = t(PROMO.label); }
+    $('[data-price-meta]').innerHTML = (!PROMO.active && b.compareAt)
       ? `<strong>${esc(t(tx.save, { amount: moneyFull(round2(b.compareAt - b.price)) }))}</strong> · ${pn}`
       : pn;
     if (animate && !reducedMotion.matches) { now.classList.remove('is-added'); void now.offsetWidth; now.classList.add('is-added'); }
 
-    $('[data-cta-price]').textContent = money(b.price);
+    $('[data-cta-price]').textContent = money(b.pay);
     if ($('[data-pill]')) updateShadeButtons();
     const ship = $('[data-ship-line]');
     ship.classList.toggle('is-free', b.freeShipping);
@@ -827,17 +849,16 @@
 
   /** Ajoute le code promo pré-appliqué (?promoCode=) au lien de paiement Whop. */
   function withPromo(url) {
-    if (!C.CHECKOUT_PROMO_CODE) return url;
-    try { const u = new URL(url); u.searchParams.set('promoCode', C.CHECKOUT_PROMO_CODE); return u.toString(); } catch (e) { return url; }
+    if (!PROMO.active) return url;
+    try { const u = new URL(url); u.searchParams.set('promoCode', PROMO.code); return u.toString(); } catch (e) { return url; }
   }
   /** Lien de paiement Whop de la teinte + du lot (config : color.checkout[nbKits]), remise incluse. */
   const directCheckoutUrl = (color, qty) => {
     const url = (C.CHECKOUT_MODE === 'direct' && color.checkout && color.checkout[qty]) || null;
     return url ? withPromo(url) : null;
   };
-  /** Montant réellement payé après le code promo pré-appliqué. */
-  const paidAmount = (value) => (C.CHECKOUT_PROMO_CODE && C.CHECKOUT_PROMO_PERCENT
-    ? round2(value * (1 - C.CHECKOUT_PROMO_PERCENT / 100)) : value);
+  /** Montant réellement payé après la remise pré-appliquée (source unique : promoPrice). */
+  const paidAmount = (value) => promoPrice(value);
 
   /**
    * Achat direct : envoie au paiement de la teinte + du lot choisis.
@@ -850,16 +871,17 @@
     local.set('rn_order_clicked', '1');
     measure('order_click', { source: source || 'autre', kits: qty });
     if (url) {
-      const value = priceForKits(qty);
+      const value = priceForKits(qty);          // prix plein du lot
+      const paid = paidAmount(value);           // montant réellement payé (remise déduite)
       const name = `${t(P.title, colorVars(color))} – ${color.name}`;
-      track('AddToCart', { content_ids: [color.variantId], content_name: name, content_type: 'product', quantity: qty, value, currency: C.CURRENCY });
-      // InitiateCheckout AVANT la redirection : "Bordeaux – 2 kits", valeur du lot en EUR
-      track('InitiateCheckout', { content_ids: [color.variantId], content_name: `${color.name} – ${qty} kit${qty > 1 ? 's' : ''}`, content_type: 'product', value, currency: 'EUR', num_items: qty });
+      track('AddToCart', { content_ids: [color.variantId], content_name: name, content_type: 'product', quantity: qty, value: paid, currency: C.CURRENCY });
+      // InitiateCheckout AVANT la redirection : "Bordeaux – 2 kits", montant réellement payé en EUR
+      track('InitiateCheckout', { content_ids: [color.variantId], content_name: `${color.name} – ${qty} kit${qty > 1 ? 's' : ''}`, content_type: 'product', value: paid, currency: 'EUR', num_items: qty });
       // Commande en cours, relue par merci.html pour l'événement Achat (valeur réelle)
       try {
         window.localStorage.setItem('rn_pending_order', JSON.stringify({
           id: `${color.id}-${qty}-${Date.now()}`, colorId: color.id, colorName: color.name,
-          variantId: color.variantId, qty, nails: nailsFor(qty, color), value, paid: paidAmount(value), promo: C.CHECKOUT_PROMO_CODE || null, currency: C.CURRENCY, ts: Date.now(),
+          variantId: color.variantId, qty, nails: nailsFor(qty, color), value, paid: paidAmount(value), promo: PROMO.active ? PROMO.code : null, currency: C.CURRENCY, ts: Date.now(),
         }));
       } catch (e) { /* stockage indisponible : l'Achat sera envoyé sans montant */ }
       if (btn) {
@@ -869,8 +891,16 @@
       }
       live(C.TEXTS.product.redirecting);
       measure('checkout_redirect', { color: color.id, kits: qty });
-      // 300 ms pour laisser partir les événements (pixel + mesure d'audience) avant de quitter la page
-      setTimeout(() => { window.location.href = url; }, 300);
+      // Avant de quitter la page : si le pixel est chargé mais que la bibliothèque Meta n'est
+      // pas encore prête (connexion mobile lente), on l'attend (1,5 s max) pour que
+      // AddToCart / InitiateCheckout partent vraiment ; puis 300 ms pour l'envoi.
+      const started = Date.now();
+      const go = () => { window.location.href = url; };
+      (function waitPixel() {
+        const fbReady = !pixelLoaded || (typeof window.fbq === 'function' && typeof window.fbq.callMethod === 'function');
+        if (fbReady || Date.now() - started > 1500) setTimeout(go, 300);
+        else setTimeout(waitPixel, 50);
+      })();
       return;
     }
     addToCart(color.variantId, qty, { openCart: false }).then(() => {
@@ -998,7 +1028,7 @@
   function updateSticky() {
     const b = currentBundle();
     $('[data-sticky-name]').textContent = `${state.color.name} · ${b.label}`;
-    $('[data-sticky-price]').innerHTML = `${money(b.price)}${b.compareAt ? `<s><span class="sr-only">au lieu de </span>${money(b.compareAt)}</s>` : ''}`;
+    $('[data-sticky-price]').innerHTML = `${money(b.pay)}${b.strike ? `<s><span class="sr-only">au lieu de </span>${money(b.strike)}</s>` : ''}`;
   }
 
   function initSticky() {
@@ -1024,38 +1054,20 @@
     const cfg = C.POPUP;
     const dlg = $('#promo');
     const K_SHOWN = 'rn_popup_shown', K_ORDER = 'rn_order_clicked';
-    const promoAuto = !!C.CHECKOUT_PROMO_CODE;
     let timer, fired = false;
 
-    // Contenu : remise déjà appliquée (un seul bouton) ou code à saisir (repli)
-    $('[data-popup-text]').textContent = promoAuto ? cfg.text : cfg.textManual;
-    $('[data-popup-code]').hidden = promoAuto;
-    $('[data-copy-code]').addEventListener('click', async (e) => {
-      const label = $('span', e.currentTarget);
-      try { await navigator.clipboard.writeText(cfg.code); } catch (err) {
-        const ta = document.createElement('textarea');
-        ta.value = cfg.code; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
-        dlg.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); } catch (e2) { /* ignoré */ }
-        ta.remove();
-      }
-      label.textContent = cfg.copiedLabel;
-      live(cfg.copiedLabel);
-      setTimeout(() => { label.textContent = cfg.copyLabel; }, 2500);
-    });
-    // Bouton unique : vers le checkout remisé de la teinte + du lot sélectionnés
+    // Rappel : la remise est déjà déduite des prix ; un seul bouton vers le checkout remisé
+    $('[data-popup-text]').textContent = t(cfg.text);
     $('[data-popup-cta]').addEventListener('click', (e) => {
       const btn = e.currentTarget;
       closeDialog(dlg).then(() => {
-        if (promoAuto && directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, btn, 'popup');
+        if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, btn, 'popup');
         else goToOffers();
       });
     });
-    // Rappel persistant du code après fermeture (uniquement si la remise n'est pas pré-appliquée)
-    dlg.addEventListener('close', () => {
-      if (!promoAuto) { const r = $('[data-promo-reminder]'); if (r) { r.hidden = false; r.textContent = t(C.TEXTS.promoReminder, { code: cfg.code }); } }
-    });
 
+    // Pas de remise active (code désactivé / date de fin passée) : pas de pop-up
+    if (!PROMO.active) return;
     if (!cfg.enabled || local.get(K_SHOWN) || local.get(K_ORDER)) return;
 
     const onScroll = () => {
@@ -1073,7 +1085,7 @@
       cleanup();
       local.set(K_SHOWN, '1');
       openDialog(dlg);
-      track('ViewPromo', { code: cfg.code });
+      track('ViewPromo', { code: PROMO.code });
       measure('popup_open');
     }
     timer = setTimeout(show, (cfg.triggerSeconds || 50) * 1000);
@@ -1197,7 +1209,7 @@
       updateShadeButtons();
     });
     // ViewContent au chargement de la fiche produit : valeur = prix du lot sélectionné
-    track('ViewContent', { content_ids: [state.color.variantId], content_name: 'Kit 30 faux ongles gel souple', content_type: 'product', value: currentBundle().price, currency: 'EUR' });
+    track('ViewContent', { content_ids: [state.color.variantId], content_name: 'Kit 30 faux ongles gel souple', content_type: 'product', value: currentBundle().pay, currency: 'EUR' });
   }
 
   window.RN = { state, BUNDLES, computeDelivery, priceForKits, setColor, setBundle };

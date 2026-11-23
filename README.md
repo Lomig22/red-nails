@@ -212,9 +212,13 @@ Le bloc livraison affiche « Livraison à Marseille » grâce à la ville devin�
 - Une fois le webhook vérifié : `PURCHASE_SERVER_SIDE: true` dans config.js (la page merci
   n'envoie alors l'Achat navigateur que si Whop fournit `?payment=pay_…`, même event_id).
 
-### Code promo pré-appliqué
-- `CHECKOUT_PROMO_CODE: 'BIENVENUE10'` ajoute `?promoCode=BIENVENUE10` à tous les liens Whop
-  (testé : 24,99 → 22,49 ; 39,98 → 35,98 ; 52,47 → 47,22). `null` pour revenir au code à saisir.
+### Remise de bienvenue pré-appliquée (source unique)
+- `PROMO_ACTIVE` + `PROMO` dans config.js (code, taux, mention, date de fin facultative).
+- Quand elle est active : prix remisé affiché partout (fiche, lots, bouton, barre collante,
+  cartes teintes) avec le prix plein barré, mention « Remise de bienvenue -10 % déjà appliquée »,
+  `?promoCode=CODE` ajouté aux liens Whop, valeur du pixel = montant réellement payé, pop-up de rappel.
+- Montants calculés : 24,99 → 22,49 · 39,98 → 35,98 · 52,47 → 47,22 (identiques au checkout Whop).
+- `PROMO_ACTIVE: false` (ou date de fin dépassée) : retour automatique aux prix pleins, sans code ni pop-up.
 
 ### Pop-up
 - Jamais au chargement : à 50 s ou à 50 % de la page, une seule fois par visiteuse
