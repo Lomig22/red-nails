@@ -923,3 +923,10 @@ body.has-sticky .consent { bottom: calc(80px + env(safe-area-inset-bottom)); }
   @keyframes consentIn { from { opacity: 0; transform: translateY(12px); } }
 }
 @media (prefers-reduced-motion: reduce) { .consent { animation: none; } }
+
+/* Mobile : bandeau EN BAS, posé juste au-dessus de la barre "Commander" (qui reste visible et cliquable) */
+@media (max-width: 699px) {
+  .consent { top: auto; bottom: calc(10px + env(safe-area-inset-bottom)); animation-name: consentUp2; }
+  body.has-sticky .consent { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+@keyframes consentUp2 { from { opacity: 0; transform: translateY(12px); } }
