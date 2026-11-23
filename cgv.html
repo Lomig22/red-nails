@@ -216,5 +216,13 @@
       </nav>
     </div>
   </footer>
+  <!-- Bannière cookies : "Accepter" dominant, refus en lien texte visible (1 clic, zone tactile ≥ 44 px). -->
+  <div class="consent" role="region" aria-label="Cookies" data-consent hidden>
+    <p class="consent__text"><span data-consent-text></span> <a href="confidentialite.html">En savoir plus</a></p>
+    <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted">Accepter</button>
+    <button class="consent__refuse" type="button" data-consent-choice="denied">Refuser</button>
+  </div>
+  <script src="config.js" defer></script>
+  <script src="consent.js" defer></script>
 </body>
 </html>

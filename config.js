@@ -324,7 +324,7 @@ window.RN_CONFIG = {
   CONSENT: {
     enabled: true,
     title: 'Un dernier détail',
-    text: 'Cookies de mesure de nos pubs (Meta, Whop). Sans effet sur ta commande.',
+    text: 'On utilise des cookies pour mesurer nos pubs (Meta, Whop).',
     accept: 'Accepter',
     refuse: 'Refuser',
     more: 'En savoir plus',

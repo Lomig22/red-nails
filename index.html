@@ -438,14 +438,12 @@
     </div>
   </dialog>
 
-  <!-- Bannière cookies : le pixel Meta ne se charge qu'après "Accepter" -->
+  <!-- Bannière cookies : "Accepter" dominant, refus en lien texte visible (1 clic, zone tactile ≥ 44 px).
+       Le pixel Meta et le pixel Whop ne se chargent qu'après "Accepter". -->
   <div class="consent" role="region" aria-label="Cookies" data-consent hidden>
-    <p class="consent__title" data-t="CONSENT.title"></p>
     <p class="consent__text"><span data-t="CONSENT.text"></span> <a data-consent-more data-t="CONSENT.more"></a></p>
-    <div class="consent__actions">
-      <button class="btn btn--ghost consent__refuse" type="button" data-consent-choice="denied" data-t="CONSENT.refuse"></button>
-      <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted" data-t="CONSENT.accept"></button>
-    </div>
+    <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted" data-t="CONSENT.accept"></button>
+    <button class="consent__refuse" type="button" data-consent-choice="denied" data-t="CONSENT.refuse"></button>
   </div>
 
   <p class="promo-reminder" data-promo-reminder hidden></p>

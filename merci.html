@@ -158,14 +158,11 @@
     </div>
   </footer>
 
-  <!-- Bannière cookies : le pixel Meta ne se charge qu'après "Accepter" -->
+  <!-- Bannière cookies : "Accepter" dominant, refus en lien texte visible (1 clic, zone tactile ≥ 44 px). -->
   <div class="consent" role="region" aria-label="Cookies" data-consent hidden>
-    <p class="consent__title">Un dernier détail</p>
     <p class="consent__text"><span data-consent-text></span> <a href="confidentialite.html">En savoir plus</a></p>
-    <div class="consent__actions">
-      <button class="btn btn--ghost consent__refuse" type="button" data-consent-choice="denied">Refuser</button>
-      <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted">Accepter</button>
-    </div>
+    <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted">Accepter</button>
+    <button class="consent__refuse" type="button" data-consent-choice="denied">Refuser</button>
   </div>
 </body>
 </html>
