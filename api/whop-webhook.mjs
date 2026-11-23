@@ -11,7 +11,7 @@
      META_TEST_EVENT_CODE   facultatif   code « Tester les événements » (ex. TEST12345)
                                          → à retirer une fois les tests terminés
      META_GRAPH_VERSION     facultatif   défaut : v23.0
-     SITE_URL               facultatif   défaut : https://red-nails.fr
+     SITE_URL               facultatif   défaut : https://www.red-nails.fr
    Aucun secret n'est écrit dans ce fichier.
 
    Format Whop (Standard Webhooks, docs.whop.com/developer/guides/webhooks) :
@@ -32,14 +32,14 @@
       le test, ex. ws_test_123), META_CAPI_TOKEN et META_TEST_EVENT_CODE
       (Gestionnaire d'événements > Tester les événements > code de test), redéployer.
    2. Vérifier que l'endpoint répond :
-        curl https://red-nails.fr/api/whop-webhook
+        curl https://www.red-nails.fr/api/whop-webhook
       → {"ok":true,…,"configured":{"whopSecret":true,"metaToken":true}}
    3. Envoyer un faux paiement signé (dans un terminal, avec le MÊME secret) :
         SECRET='ws_test_123'
         BODY='{"type":"payment.succeeded","data":{"id":"pay_TEST001","total":{"amount":"24.99","currency":"eur"},"customer_email":"test@example.com","variant_id":"plan_w7AeKgI8selsO","paid_at":"2026-11-23T10:00:00Z"}}'
         ID="msg_test_$(date +%s)"; TS=$(date +%s)
         SIG=$(printf '%s' "$ID.$TS.$BODY" | openssl dgst -sha256 -hmac "$SECRET" -binary | base64)
-        curl -i -X POST https://red-nails.fr/api/whop-webhook \
+        curl -i -X POST https://www.red-nails.fr/api/whop-webhook \
           -H "content-type: application/json" -H "webhook-id: $ID" \
           -H "webhook-timestamp: $TS" -H "webhook-signature: v1,$SIG" --data "$BODY"
       → HTTP 200 {"ok":true,"forwarded":true,…} et un « Achat » de test dans
@@ -201,7 +201,7 @@ export async function POST(request) {
     return json(200, { ok: true, forwarded: false, reason: 'token Meta manquant' });
   }
 
-  const event = buildPurchaseEvent(payment, { siteUrl: env.SITE_URL || 'https://red-nails.fr' });
+  const event = buildPurchaseEvent(payment, { siteUrl: env.SITE_URL || 'https://www.red-nails.fr' });
   try {
     const meta = await sendToMeta(event, env);
     if (!meta.ok) {
