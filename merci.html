@@ -107,6 +107,10 @@
     })();
   </script>
   <!-- End Whop Pixel -->
+
+  <!-- Vercel Web Analytics : mesure d'audience SANS cookie, sans consentement requis. -->
+  <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+  <script defer src="/_vercel/insights/script.js"></script>
   <script src="config.js" defer></script>
   <script src="merci.js" defer></script>
 </head>
@@ -156,10 +160,11 @@
 
   <!-- Bannière cookies : le pixel Meta ne se charge qu'après "Accepter" -->
   <div class="consent" role="region" aria-label="Cookies" data-consent hidden>
+    <p class="consent__title">Un dernier détail</p>
     <p class="consent__text"><span data-consent-text></span> <a href="confidentialite.html">En savoir plus</a></p>
     <div class="consent__actions">
-      <button class="btn btn--ghost" type="button" data-consent-choice="denied">Refuser</button>
-      <button class="btn btn--ghost" type="button" data-consent-choice="granted">Accepter</button>
+      <button class="btn btn--ghost consent__refuse" type="button" data-consent-choice="denied">Refuser</button>
+      <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted">Accepter</button>
     </div>
   </div>
 </body>

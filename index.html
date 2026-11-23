@@ -148,6 +148,12 @@
     })();
   </script>
   <!-- End Whop Pixel -->
+
+  <!-- Vercel Web Analytics : mesure d'audience SANS cookie, sans consentement requis.
+       S'active dans Vercel (projet > Analytics > Enable). window.va reçoit aussi les
+       événements personnalisés (scroll, clics, checkout) envoyés par app.js. -->
+  <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+  <script defer src="/_vercel/insights/script.js"></script>
   <script>document.documentElement.classList.add('js');</script>
   <script src="config.js" defer></script>
   <script src="app.js" defer></script>
@@ -297,6 +303,28 @@
     </section>
 
     <!-- ================================================================
+         5 bis. AVIS CLIENTES (entre le mode d'emploi et les teintes)
+         Affichée uniquement avec de VRAIS avis (RN_CONFIG.REVIEWS.items) ou
+         via un module d'avis vérifiés. Aucun avis n'est inventé.
+         - Judge.me : <div class="jdgm-widget jdgm-review-widget" data-id="{{ product.id }}"></div>
+         - Loox     : <div id="looxReviews" data-product-id="{{ product.id }}"></div>
+         ================================================================ -->
+    <section id="avis" class="section reviews" aria-labelledby="reviews-title" hidden>
+      <div class="container">
+        <p class="reviews__notice" data-reviews-notice hidden></p>
+        <div class="reviews__head">
+          <div>
+            <p class="eyebrow" data-t="REVIEWS.eyebrow"></p>
+            <h2 id="reviews-title" class="h2" data-t="REVIEWS.title"></h2>
+          </div>
+          <div class="reviews__summary" data-reviews-summary></div>
+        </div>
+        <ul class="reviews__list" data-reviews-list></ul>
+        <div id="reviews-widget"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================
          6. LES TEINTES
          ================================================================ -->
     <section id="teintes" class="section shades reveal" aria-labelledby="colors-title">
@@ -331,27 +359,6 @@
       </div>
     </section>
 
-    <!-- ================================================================
-         8. AVIS CLIENTES
-         Affichée uniquement avec de VRAIS avis (RN_CONFIG.REVIEWS.items) ou
-         via un module d'avis vérifiés. Aucun avis n'est inventé.
-         - Judge.me : <div class="jdgm-widget jdgm-review-widget" data-id="{{ product.id }}"></div>
-         - Loox     : <div id="looxReviews" data-product-id="{{ product.id }}"></div>
-         ================================================================ -->
-    <section id="avis" class="section reviews" aria-labelledby="reviews-title" hidden>
-      <div class="container">
-        <p class="reviews__notice" data-reviews-notice hidden></p>
-        <div class="reviews__head">
-          <div>
-            <p class="eyebrow" data-t="REVIEWS.eyebrow"></p>
-            <h2 id="reviews-title" class="h2" data-t="REVIEWS.title"></h2>
-          </div>
-          <div class="reviews__summary" data-reviews-summary></div>
-        </div>
-        <ul class="reviews__list" data-reviews-list></ul>
-        <div id="reviews-widget"></div>
-      </div>
-    </section>
 
     <!-- ================================================================
          9. FAQ
@@ -421,8 +428,8 @@
       </button>
       <p class="eyebrow eyebrow--center" data-t="POPUP.eyebrow"></p>
       <h2 id="promo-title" class="popup__title"><span data-t="POPUP.title"></span> <em data-t="POPUP.subtitle"></em></h2>
-      <p class="popup__text" data-t="POPUP.text"></p>
-      <div class="popup__code">
+      <p class="popup__text" data-popup-text></p>
+      <div class="popup__code" data-popup-code>
         <code data-t="POPUP.code"></code>
         <button class="btn btn--ghost" type="button" data-copy-code><span data-t="POPUP.copyLabel"></span></button>
       </div>
@@ -433,12 +440,15 @@
 
   <!-- Bannière cookies : le pixel Meta ne se charge qu'après "Accepter" -->
   <div class="consent" role="region" aria-label="Cookies" data-consent hidden>
+    <p class="consent__title" data-t="CONSENT.title"></p>
     <p class="consent__text"><span data-t="CONSENT.text"></span> <a data-consent-more data-t="CONSENT.more"></a></p>
     <div class="consent__actions">
-      <button class="btn btn--ghost" type="button" data-consent-choice="denied" data-t="CONSENT.refuse"></button>
-      <button class="btn btn--ghost" type="button" data-consent-choice="granted" data-t="CONSENT.accept"></button>
+      <button class="btn btn--ghost consent__refuse" type="button" data-consent-choice="denied" data-t="CONSENT.refuse"></button>
+      <button class="btn btn--primary consent__accept" type="button" data-consent-choice="granted" data-t="CONSENT.accept"></button>
     </div>
   </div>
+
+  <p class="promo-reminder" data-promo-reminder hidden></p>
 
   <div class="sr-only" aria-live="polite" data-live></div>
   <noscript><p class="noscript">Active JavaScript pour commander sur red-nails.fr.</p></noscript>

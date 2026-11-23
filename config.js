@@ -59,6 +59,20 @@ window.RN_CONFIG = {
   CURRENCY: 'EUR',
 
   CHECKOUT_URL: CHECKOUT_URL,
+  // Code promo pré-appliqué sur le checkout Whop (paramètre ?promoCode=, testé :
+  // 24,99 € → 22,49 € affiché à l'arrivée sur Whop). null pour ne rien appliquer.
+  // Le code doit exister et être actif dans Whop (Codes promo).
+  CHECKOUT_PROMO_CODE: 'BIENVENUE10',
+  CHECKOUT_PROMO_PERCENT: 10,   // sert à afficher la remise et à calculer la valeur de l'Achat
+  // true une fois le webhook Whop → API Conversions Meta en place (/api/whop-webhook) :
+  // l'Achat est alors envoyé par le serveur, et la page merci ne l'envoie plus que si Whop
+  // fournit l'identifiant du paiement (?payment=pay_…), pour un dédoublonnage exact.
+  PURCHASE_SERVER_SIDE: false,
+  // Mesure d'audience sans cookie ni consentement (Vercel Web Analytics).
+  // À activer dans Vercel : projet > Analytics > Enable. Les événements personnalisés
+  // (scroll, clics…) nécessitent l'offre Vercel Pro. Alternative : Plausible (domaine ci-dessous).
+  ANALYTICS: { vercel: true, plausibleDomain: null },
+
   // 'direct' : chaque bouton d'achat envoie directement vers le lien de paiement
   // Whop de la teinte + du lot choisis (champ "checkout" de chaque couleur).
   // 'cart' : ancien tiroir panier (démo / Shopify).
@@ -97,12 +111,13 @@ window.RN_CONFIG = {
      ⚠️ "Le plus choisi" doit correspondre à la réalité de tes ventes.        */
   BUNDLES: [
     { qty: 1, price: PRIX_UNITAIRE, label: '1 kit', highlight: '' },
-    { qty: 2, price: 39.98, label: '2 kits', highlight: '' },
-    { qty: 3, price: 52.47, label: '3 kits', highlight: 'Le plus choisi' },
+    { qty: 2, price: 39.98, label: '2 kits', highlight: 'Le plus choisi' },
+    { qty: 3, price: 52.47, label: '3 kits', highlight: '' },
   ],
   // Lot présélectionné à l'arrivée (0 = 1 kit, 1 = 2 kits, 2 = 3 kits).
-  // Le lot de 2 affiche directement un prix barré légal (-20 %).
-  DEFAULT_BUNDLE: 1,
+  // 1 kit à 24,99 € = le prix annoncé dans les publicités. 2 et 3 kits restent
+  // proposés en montée en gamme.
+  DEFAULT_BUNDLE: 0,
   CTA_PRESELECT_BEST: false,
   // Cartes de la section "Trouve ta teinte" : nombre de kits commandés au clic
   // (1 = "Commander · 24,99 €", quel que soit le lot choisi plus haut).
@@ -284,6 +299,13 @@ window.RN_CONFIG = {
      Si tu branches Judge.me ou Loox, laisse la liste vide et colle leur
      widget dans #reviews-widget (index.html).                                */
   REVIEWS: {
+    // TODO : coller ici les VRAIS avis de vraies clientes, puis supprimer ce commentaire.
+    // Tant que la liste est vide, la section #avis et la note sous le titre sont masquées.
+    // Modèle (provisoire, NE PAS publier tel quel) :
+    //   { name: 'Prénom N.', rating: 5, text: 'Texte exact de la cliente…',
+    //     color: 'bordeaux', date: '2026-11-30', city: 'Ville', verified: true },
+    // Aperçu de la mise en page avec des exemples marqués « fictifs » : ajoute
+    // ?apercu-avis=1 à l'adresse (jamais visible sans ce paramètre).
     items: [],
     eyebrow: 'Avis clientes',
     title: 'Elles les portent',
@@ -301,7 +323,8 @@ window.RN_CONFIG = {
   META_PIXEL_ID: '2750897045307789',
   CONSENT: {
     enabled: true,
-    text: 'Nous utilisons des cookies pour mesurer l’efficacité de nos publicités et l’activité du site (Meta et Whop). Tu peux accepter ou refuser : ça ne change rien à ta commande.',
+    title: 'Un dernier détail',
+    text: 'Cookies de mesure de nos pubs (Meta, Whop). Sans effet sur ta commande.',
     accept: 'Accepter',
     refuse: 'Refuser',
     more: 'En savoir plus',
@@ -312,19 +335,22 @@ window.RN_CONFIG = {
   /* ---------- Pop-up promo ---------- */
   POPUP: {
     enabled: true,
-    delaySeconds: 12,        // 1re apparition
-    repeatEveryMinutes: 2,   // réapparaît toutes les 2 min après fermeture (0 = une seule fois)
-    maxPerSession: 5,        // au maximum 5 fois par visite
-    // Le pop-up ne revient plus dès que la visiteuse a copié le code.
-    exitIntent: true,
+    // Jamais au chargement : au premier des deux événements ci-dessous,
+    // une seule fois par visiteuse (mémorisé, même après rechargement),
+    // et jamais si elle a déjà cliqué sur un bouton de commande.
+    triggerSeconds: 50,
+    triggerScrollPercent: 50,
     eyebrow: 'Bienvenue chez RED NAILS',
     title: '-10 %',
     subtitle: 'sur ta première commande',
-    text: 'Utilise ce code au moment du paiement :',
+    // Remise pré-appliquée (CHECKOUT_PROMO_CODE) : rien à copier ni à saisir.
+    text: 'Ta remise est déjà appliquée : tu la verras directement sur la page de paiement.',
+    // Si CHECKOUT_PROMO_CODE est null : texte et code affichés à la place.
+    textManual: 'Saisis ce code dans « Code promo et détails », en haut de la page de paiement :',
     code: 'BIENVENUE10',
     copyLabel: 'Copier',
     copiedLabel: 'Copié ✓',
-    cta: 'Je choisis ma teinte',
+    cta: 'J’en profite',
     dismiss: 'Non merci',
   },
 
@@ -371,6 +397,7 @@ window.RN_CONFIG = {
     ],
 
     cta: 'J’en profite · jusqu’à -{maxDiscount} %',
+    promoReminder: 'Code -10 % : {code} · à saisir dans « Code promo et détails » au paiement',
     ctaNote: 'Livraison offerte · Retours {returnDays} jours',
 
     // Section "Le détail" (remplace l'ancienne comparaison de prix)

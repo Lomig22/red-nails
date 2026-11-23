@@ -43,6 +43,46 @@
     set(k, v) { try { window.sessionStorage.setItem(k, v); } catch (e) { /* ignoré */ } },
   };
 
+  /** localStorage protégé (mémoire durable : pop-up déjà vue, commande cliquée…) */
+  const local = {
+    get(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { window.localStorage.setItem(k, v); } catch (e) { /* ignoré */ } },
+  };
+
+  /* ---------- Mesure d'audience SANS cookie ni consentement ----------
+     Vercel Web Analytics (window.va) et/ou Plausible (window.plausible).
+     Source de vérité indépendante du pixel Meta : 100 % des visiteuses.
+     Noms d'événements : landing, scroll_25/50/75, order_click, popup_open,
+     shade_card_click, checkout_redirect. 2 propriétés max (limite Vercel). */
+  function measure(name, data) {
+    try {
+      const A = C.ANALYTICS || {};
+      if (A.vercel && typeof window.va === 'function') window.va('event', data ? { name, data } : { name });
+      if (A.plausibleDomain && typeof window.plausible === 'function') window.plausible(name, data ? { props: data } : undefined);
+    } catch (e) { /* la mesure ne doit jamais casser la page */ }
+  }
+  function initAnalytics() {
+    const A = C.ANALYTICS || {};
+    // Plausible (optionnel) : chargé seulement si un domaine est configuré
+    if (A.plausibleDomain && !window.plausible) {
+      window.plausible = function () { (window.plausible.q = window.plausible.q || []).push(arguments); };
+      const sc = document.createElement('script');
+      sc.defer = true; sc.src = 'https://plausible.io/js/script.js'; sc.setAttribute('data-domain', A.plausibleDomain);
+      document.head.appendChild(sc);
+    }
+    // Arrivée sur la page (avec la source publicitaire si présente)
+    measure('landing', { source: params.get('utm_source') || (params.has('fbclid') ? 'facebook' : 'direct') });
+    // Profondeur de défilement : part de la page vue (25 / 50 / 75 %)
+    const marks = [25, 50, 75], done = {};
+    const onScroll = () => {
+      const h = document.documentElement;
+      const pct = ((h.scrollTop || document.body.scrollTop) + window.innerHeight) / h.scrollHeight * 100;
+      marks.forEach((m) => { if (pct >= m && !done[m]) { done[m] = 1; measure('scroll_' + m); } });
+      if (done[75]) window.removeEventListener('scroll', onScroll);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
   /* ---------- Pixel Meta + consentement (CNIL) ---------- */
   const META_STANDARD = ['PageView', 'ViewContent', 'AddToCart', 'InitiateCheckout', 'Purchase', 'Lead'];
   const CONSENT_KEY = 'rn_consent';
@@ -526,7 +566,8 @@
       if (!color) return;
       $('[data-pill]', card).textContent = C.TEXTS.colors.redirecting;
       card.setAttribute('aria-busy', 'true');
-      buyNow(color, shadeBundle().qty);
+      measure('shade_card_click', { color: color.id });
+      buyNow(color, shadeBundle().qty, null, 'shade_card');
     });
     updateShadeButtons();
   }
@@ -784,16 +825,30 @@
   }
   window.addToCart = addToCart;
 
-  /** Lien de paiement Whop de la teinte + du lot (config : color.checkout[nbKits]). */
-  const directCheckoutUrl = (color, qty) => (C.CHECKOUT_MODE === 'direct' && color.checkout && color.checkout[qty]) || null;
+  /** Ajoute le code promo pré-appliqué (?promoCode=) au lien de paiement Whop. */
+  function withPromo(url) {
+    if (!C.CHECKOUT_PROMO_CODE) return url;
+    try { const u = new URL(url); u.searchParams.set('promoCode', C.CHECKOUT_PROMO_CODE); return u.toString(); } catch (e) { return url; }
+  }
+  /** Lien de paiement Whop de la teinte + du lot (config : color.checkout[nbKits]), remise incluse. */
+  const directCheckoutUrl = (color, qty) => {
+    const url = (C.CHECKOUT_MODE === 'direct' && color.checkout && color.checkout[qty]) || null;
+    return url ? withPromo(url) : null;
+  };
+  /** Montant réellement payé après le code promo pré-appliqué. */
+  const paidAmount = (value) => (C.CHECKOUT_PROMO_CODE && C.CHECKOUT_PROMO_PERCENT
+    ? round2(value * (1 - C.CHECKOUT_PROMO_PERCENT / 100)) : value);
 
   /**
    * Achat direct : envoie au paiement de la teinte + du lot choisis.
    * - Mode 'direct' (Whop) : événements Meta AddToCart + InitiateCheckout, puis redirection.
    * - Mode 'cart' : ajoute au panier puis /checkout (ou ouvre le panier en démo).
    */
-  function buyNow(color, qty, btn) {
+  function buyNow(color, qty, btn, source) {
     const url = directCheckoutUrl(color, qty);
+    // Bouton de commande cliqué : la pop-up promo ne s'affichera plus pour cette visiteuse
+    local.set('rn_order_clicked', '1');
+    measure('order_click', { source: source || 'autre', kits: qty });
     if (url) {
       const value = priceForKits(qty);
       const name = `${t(P.title, colorVars(color))} – ${color.name}`;
@@ -804,7 +859,7 @@
       try {
         window.localStorage.setItem('rn_pending_order', JSON.stringify({
           id: `${color.id}-${qty}-${Date.now()}`, colorId: color.id, colorName: color.name,
-          variantId: color.variantId, qty, nails: nailsFor(qty, color), value, currency: C.CURRENCY, ts: Date.now(),
+          variantId: color.variantId, qty, nails: nailsFor(qty, color), value, paid: paidAmount(value), promo: C.CHECKOUT_PROMO_CODE || null, currency: C.CURRENCY, ts: Date.now(),
         }));
       } catch (e) { /* stockage indisponible : l'Achat sera envoyé sans montant */ }
       if (btn) {
@@ -813,9 +868,9 @@
         label.textContent = C.TEXTS.product.redirecting;
       }
       live(C.TEXTS.product.redirecting);
-      // petit délai pour laisser partir les événements du pixel avant de quitter la page
-      // 300 ms pour laisser partir les événements du pixel avant de quitter la page
-      setTimeout(() => { window.location.href = url; }, pixelLoaded ? 300 : 0);
+      measure('checkout_redirect', { color: color.id, kits: qty });
+      // 300 ms pour laisser partir les événements (pixel + mesure d'audience) avant de quitter la page
+      setTimeout(() => { window.location.href = url; }, 300);
       return;
     }
     addToCart(color.variantId, qty, { openCart: false }).then(() => {
@@ -888,8 +943,9 @@
     $('[data-open-cart]').addEventListener('click', () => openDialog(cartEl()));
     $$('[data-add-current]').forEach((btn) => btn.addEventListener('click', () => {
       btn.classList.remove('is-added'); void btn.offsetWidth; btn.classList.add('is-added');
-      if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, btn);
-      else addToCart(state.color.variantId, currentBundle().qty);
+      const source = btn.id === 'main-cta' ? 'main' : (btn.closest('.sticky-buy') ? 'sticky' : 'autre');
+      if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, btn, source);
+      else { local.set('rn_order_clicked', '1'); measure('order_click', { source, kits: currentBundle().qty }); addToCart(state.color.variantId, currentBundle().qty); }
     }));
     // Paiement direct : pas de panier, l'icône panier n'a plus d'utilité
     if (C.CHECKOUT_MODE === 'direct') $('[data-open-cart]').hidden = true;
@@ -961,23 +1017,19 @@
   }
 
   /* ======================================================================
-     11. POP-UP PROMO — 12 s ou intention de sortie, 1 fois par session
+     11. POP-UP PROMO — jamais au chargement : 50 s OU 50 % de la page,
+         une seule fois par visiteuse, jamais après un clic de commande.
      ====================================================================== */
-  /**
-   * Pop-up code promo : 1re apparition après delaySeconds (ou intention de sortie
-   * sur ordinateur), puis de nouveau toutes les repeatEveryMinutes, au maximum
-   * maxPerSession fois par visite. Ne revient plus une fois le code copié.
-   * Compteurs gardés en sessionStorage (survivent à un rechargement de page).
-   */
   function initPopup() {
     const cfg = C.POPUP;
     const dlg = $('#promo');
-    const K_COUNT = 'rn_popup_count', K_LAST = 'rn_popup_last', K_DONE = 'rn_popup_done';
-    const count = () => parseInt(session.get(K_COUNT) || '0', 10) || 0;
-    const repeatMs = (cfg.repeatEveryMinutes || 0) * 60000;
-    const max = cfg.maxPerSession || 1;
-    let timer;
+    const K_SHOWN = 'rn_popup_shown', K_ORDER = 'rn_order_clicked';
+    const promoAuto = !!C.CHECKOUT_PROMO_CODE;
+    let timer, fired = false;
 
+    // Contenu : remise déjà appliquée (un seul bouton) ou code à saisir (repli)
+    $('[data-popup-text]').textContent = promoAuto ? cfg.text : cfg.textManual;
+    $('[data-popup-code]').hidden = promoAuto;
     $('[data-copy-code]').addEventListener('click', async (e) => {
       const label = $('span', e.currentTarget);
       try { await navigator.clipboard.writeText(cfg.code); } catch (err) {
@@ -990,41 +1042,42 @@
       label.textContent = cfg.copiedLabel;
       live(cfg.copiedLabel);
       setTimeout(() => { label.textContent = cfg.copyLabel; }, 2500);
-      session.set(K_DONE, '1'); // code récupéré : on ne réaffiche plus le pop-up
-      clearTimeout(timer);
     });
-    $('[data-popup-cta]').addEventListener('click', () => closeDialog(dlg).then(goToOffers));
+    // Bouton unique : vers le checkout remisé de la teinte + du lot sélectionnés
+    $('[data-popup-cta]').addEventListener('click', (e) => {
+      const btn = e.currentTarget;
+      closeDialog(dlg).then(() => {
+        if (promoAuto && directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, btn, 'popup');
+        else goToOffers();
+      });
+    });
+    // Rappel persistant du code après fermeture (uniquement si la remise n'est pas pré-appliquée)
+    dlg.addEventListener('close', () => {
+      if (!promoAuto) { const r = $('[data-promo-reminder]'); if (r) { r.hidden = false; r.textContent = t(C.TEXTS.promoReminder, { code: cfg.code }); } }
+    });
 
-    const canShow = () => cfg.enabled && !session.get(K_DONE) && count() < max;
-    if (!canShow()) return;
+    if (!cfg.enabled || local.get(K_SHOWN) || local.get(K_ORDER)) return;
 
-    const onMouseOut = (e) => { if (!e.relatedTarget && e.clientY <= 0) show(); };
-    if (cfg.exitIntent && canHover.matches) document.addEventListener('mouseout', onMouseOut);
-
-    function schedule() {
-      clearTimeout(timer);
-      if (!canShow()) { document.removeEventListener('mouseout', onMouseOut); return; }
-      const last = parseInt(session.get(K_LAST) || '0', 10);
-      const wait = count() === 0 ? cfg.delaySeconds * 1000 : Math.max(5000, last + repeatMs - Date.now());
-      if (count() > 0 && !repeatMs) return;
-      timer = setTimeout(show, wait);
-    }
+    const onScroll = () => {
+      const h = document.documentElement;
+      const pct = ((h.scrollTop || document.body.scrollTop) + window.innerHeight) / h.scrollHeight * 100;
+      if (pct >= (cfg.triggerScrollPercent || 50)) show();
+    };
+    function cleanup() { clearTimeout(timer); window.removeEventListener('scroll', onScroll); }
     function show() {
-      if (!canShow() || dlg.open) return;
-      // jamais par-dessus le panier ou une autre fenêtre : on réessaie un peu plus tard
-      if ($('dialog[open]')) { clearTimeout(timer); timer = setTimeout(show, 8000); return; }
-      // l'intention de sortie ne doit pas court-circuiter l'intervalle entre deux affichages
-      const last = parseInt(session.get(K_LAST) || '0', 10);
-      if (count() > 0 && Date.now() - last < repeatMs) return;
-      clearTimeout(timer);
-      session.set(K_COUNT, String(count() + 1));
-      session.set(K_LAST, String(Date.now()));
+      if (fired) return;
+      if (local.get(K_ORDER) || local.get(K_SHOWN)) { cleanup(); return; }
+      // jamais par-dessus une autre fenêtre (panier, bannière cookies) : on réessaie un peu plus tard
+      if ($('dialog[open]') || !$('[data-consent]').hidden) { clearTimeout(timer); timer = setTimeout(show, 4000); return; }
+      fired = true;
+      cleanup();
+      local.set(K_SHOWN, '1');
       openDialog(dlg);
-      track('ViewPromo', { code: cfg.code, occurrence: count() });
+      track('ViewPromo', { code: cfg.code });
+      measure('popup_open');
     }
-    // à la fermeture, on programme le prochain affichage (intervalle compté à partir de la fermeture)
-    dlg.addEventListener('close', () => { session.set(K_LAST, String(Date.now())); schedule(); });
-    schedule();
+    timer = setTimeout(show, (cfg.triggerSeconds || 50) * 1000);
+    window.addEventListener('scroll', onScroll, { passive: true });
   }
 
   /* ======================================================================
@@ -1124,6 +1177,7 @@
     initDialogs();
     initCart();
     initSticky();
+    initAnalytics();
     initPopup();
     initReviews();
     initReveal();
@@ -1131,7 +1185,7 @@
     initGlow();
     // "J'en profite" : paiement direct de la teinte + du lot sélectionnés (sinon : remonte aux lots)
     $$('[data-cta-offers]').forEach((b) => b.addEventListener('click', () => {
-      if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, b);
+      if (directCheckoutUrl(state.color, currentBundle().qty)) buyNow(state.color, currentBundle().qty, b, 'cta_band');
       else goToOffers();
     }));
     // Retour depuis la page de paiement (bouton "précédent") : on remet les boutons en état

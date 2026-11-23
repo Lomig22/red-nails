@@ -119,9 +119,7 @@ de la galerie (même chemin que la 1re photo de la couleur) : c'est ce qui rend 
 - Tous les textes : `TEXTS` (bandeau défilant, étapes, contenu du kit, FAQ, footer, panier…).
   Les mots entre `{accolades}` sont remplacés automatiquement (liste en tête de `config.js`).
 - Pop-up : `POPUP` (délai, code promo, textes, `enabled: false` pour la couper).
-  Elle s'affiche après 12 s (ou à l'intention de sortie sur ordinateur), puis revient toutes les
-  `repeatEveryMinutes` (2 min) après fermeture, au maximum `maxPerSession` fois (5) par visite.
-  Elle ne revient plus dès que la visiteuse a copié le code. Le code `BIENVENUE10` doit exister dans Shopify
+  Elle s'affiche à 50 s ou à 50 % de la page, une seule fois par visiteuse (voir plus bas). Le code `BIENVENUE10` doit exister dans Shopify
   (Remises → Code de réduction).
 - Avis clients : la section existe mais reste **cachée et vide**. Une fois Judge.me ou Loox
   installé, colle le widget dans `#reviews-widget` (voir le commentaire dans `index.html`) puis passe
@@ -193,6 +191,34 @@ Le bloc livraison affiche « Livraison à Marseille » grâce à la ville devin�
 - Couleurs : variables en haut de `styles.css` (`--red`, `--ink`, `--bg`…).
 - Les boutons d'achat « s'illuminent » (halo + reflet) : classe `btn--glow`, coupée si la visiteuse
   a activé la réduction des animations.
+
+## Mesure, pixel et achats (novembre 2026)
+
+### Mesure d'audience sans cookie — Vercel Web Analytics
+- Script `/_vercel/insights/script.js` sur toutes les pages : **à activer dans Vercel**
+  (projet > Analytics > Enable). Aucun cookie, pas de consentement requis.
+- Événements envoyés par `app.js` (fonction `measure()`) : `landing` (source), `scroll_25/50/75`,
+  `order_click` (source : main, sticky, cta_band, shade_card, popup ; kits), `popup_open`,
+  `shade_card_click` (teinte), `checkout_redirect` (teinte, kits).
+- Les **événements personnalisés** n'apparaissent qu'avec l'offre **Vercel Pro**. Alternative :
+  Plausible (`ANALYTICS.plausibleDomain` dans config.js), mêmes événements.
+
+### Achat côté serveur — /api/whop-webhook (API Conversions Meta)
+- Fichier `api/whop-webhook.mjs` : vérifie la signature Whop puis envoie `Purchase` à Meta
+  (montant payé, EUR, event_id = identifiant du paiement `pay_…`, e-mail haché SHA-256).
+- Variables d'environnement Vercel : `WHOP_WEBHOOK_SECRET`, `META_CAPI_TOKEN`
+  (facultatives : `META_TEST_EVENT_CODE`, `META_PIXEL_ID`, `META_GRAPH_VERSION`, `SITE_URL`).
+- Procédure de test avec une requête factice signée : en tête du fichier.
+- Une fois le webhook vérifié : `PURCHASE_SERVER_SIDE: true` dans config.js (la page merci
+  n'envoie alors l'Achat navigateur que si Whop fournit `?payment=pay_…`, même event_id).
+
+### Code promo pré-appliqué
+- `CHECKOUT_PROMO_CODE: 'BIENVENUE10'` ajoute `?promoCode=BIENVENUE10` à tous les liens Whop
+  (testé : 24,99 → 22,49 ; 39,98 → 35,98 ; 52,47 → 47,22). `null` pour revenir au code à saisir.
+
+### Pop-up
+- Jamais au chargement : à 50 s ou à 50 % de la page, une seule fois par visiteuse
+  (localStorage), jamais après un clic sur un bouton de commande.
 
 ## ⚠️ À valider avant la mise en ligne
 

@@ -852,3 +852,34 @@ mark.todo { background: #FDE3E7; color: var(--red-deep); padding: 1px 4px; font-
   animation-delay: calc(var(--i, 0) * 55ms + 60ms), calc(var(--i, 0) * 55ms + 900ms);
 }
 @media (prefers-reduced-motion: reduce) { .js .btn--glow.enter { animation: none !important; } }
+
+/* ---------- Bannière cookies v2 : une étape courte du parcours, au-dessus de la barre d'achat ---------- */
+.consent {
+  left: 10px; right: 10px; max-width: 520px; padding: 16px 16px 14px; gap: 10px;
+  border: 0; border-top: 2px solid var(--red); box-shadow: 0 -2px 0 rgba(0,0,0,0), 0 22px 50px -18px rgba(23, 16, 15, .55);
+  animation: consentUp .45s var(--ease);
+}
+@keyframes consentUp { from { opacity: 0; transform: translateY(18px); } }
+body.has-sticky .consent { bottom: calc(80px + env(safe-area-inset-bottom)); }
+.consent__title { font-family: var(--serif); font-size: 1.12rem; font-weight: 500; color: var(--ink); line-height: 1.2; }
+.consent__text { font-size: .86rem; line-height: 1.45; color: var(--ink-2); }
+.consent__text a { color: var(--muted); font-size: .8rem; }
+.consent__actions { grid-template-columns: 1fr 1fr; gap: 8px; }
+.consent__actions .btn { min-height: 48px; font-size: .74rem; letter-spacing: .14em; }
+.consent__accept { box-shadow: 0 10px 22px -12px rgba(200, 16, 46, .8); }
+.consent__refuse { border-color: var(--line-2); color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .consent { animation: none; } }
+
+/* ---------- Rappel du code promo (si la remise n'est pas pré-appliquée) ---------- */
+.promo-reminder {
+  position: fixed; z-index: 39; left: 50%; transform: translateX(-50%); top: 10px; max-width: calc(100% - 24px);
+  background: var(--ink); color: #fff; font-size: .74rem; letter-spacing: .04em; text-align: center;
+  padding: 8px 14px; border-radius: 20px; box-shadow: 0 10px 24px -12px rgba(0,0,0,.5);
+}
+/* Bannière compacte sur mobile : ne masque pas le prix à l'arrivée */
+@media (max-width: 699px) {
+  .consent { padding: 12px 14px 12px; gap: 8px; }
+  .consent__title { font-size: 1rem; }
+  .consent__text { font-size: .8rem; line-height: 1.4; }
+  .consent__actions .btn { min-height: 44px; padding-top: 8px; padding-bottom: 8px; }
+}

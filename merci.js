@@ -24,7 +24,7 @@
 
   if (order) {
     $('[data-recap]').hidden = false;
-    $('[data-recap-line]').textContent = `${order.qty} kit${order.qty > 1 ? 's' : ''} · ${order.nails} faux ongles ${order.colorName} · ${money(order.value)}`;
+    $('[data-recap-line]').textContent = `${order.qty} kit${order.qty > 1 ? 's' : ''} · ${order.nails} faux ongles ${order.colorName} · ${money(order.paid != null ? order.paid : order.value)}`;
   }
 
   /* ---------- Consentement (même format que app.js : 6 mois) ---------- */
@@ -64,10 +64,19 @@
     // Pas de commande enregistrée (page ouverte directement, test…) : aucun Achat envoyé,
     // pour ne pas fausser les statistiques Meta.
     if (!order) return;
+    // Identifiant de l'événement = identifiant du paiement Whop (pay_…) s'il est fourni
+    // dans l'adresse de retour (?payment=pay_…) : c'est le même event_id que celui envoyé
+    // par le serveur (/api/whop-webhook → API Conversions), Meta compte donc l'achat 1 fois.
+    const qs = new URLSearchParams(location.search);
+    const paymentId = /^pay_/.test(qs.get('payment') || '') ? qs.get('payment') : null;
+    if (qs.get('status') && qs.get('status') !== 'succeeded') return; // paiement échoué / annulé
+    // Achat envoyé par le serveur et pas d'identifiant de paiement : impossible de dédoublonner,
+    // on laisse le serveur seul compter l'achat.
+    if (C.PURCHASE_SERVER_SIDE && !paymentId) { store.del('rn_pending_order'); return; }
     const sentKey = 'rn_purchase_sent';
-    const id = order.id;
+    const id = paymentId || order.id;
     if (store.get(sentKey) === id) return;
-    const data = { value: order.value, currency: order.currency || 'EUR', content_ids: [order.variantId], content_name: `Kit ${Math.round(order.nails / order.qty)} faux ongles – ${order.colorName}`, content_type: 'product', num_items: order.qty };
+    const data = { value: order.paid != null ? order.paid : order.value, currency: order.currency || 'EUR', content_ids: [order.variantId], content_name: `Kit ${Math.round(order.nails / order.qty)} faux ongles – ${order.colorName}`, content_type: 'product', num_items: order.qty };
     // eventID : permet à Meta de dédoublonner si Whop envoie aussi l'Achat via l'API de conversion
     window.fbq('track', 'Purchase', data, { eventID: id });
     store.set(sentKey, id);
